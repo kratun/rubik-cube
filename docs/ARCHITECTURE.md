@@ -28,8 +28,8 @@ Dependencies point inward. `Rubik.Domain` references nothing; a test fails the b
 - **The cube is derived, never stored.** A session stores only its ordered move list; the cube is rebuilt by replaying it. Undo, reset and history are list operations, and there is no second state to keep in sync.
 - **One rotation function for all six faces.** The cube is 26 cubies with coordinates and sticker normals; a face turn rotates the coordinates and normals of one layer by 90 degrees. There are no hand-written permutation tables to get wrong.
 - **The exploded view is a separate projection.** The engine knows nothing about printing. The backend produces both the face grids and the text lines once; the frontend only displays them.
-- **The repository owns atomicity.** One compare-and-set method takes an expected version. Two people sharing a link cannot silently overwrite each other: the second request gets `409 Conflict`. A database can replace the in-memory repository without touching the use cases.
-- **Failures are values.** Invalid moves, unknown cubes and version conflicts are `Result` errors mapped to 400, 404 and 409 in one place, with a plain `ErrorDetails` body.
+- **The repository owns atomicity.** One compare-and-set method takes an expected revision (a hash of the move list, not its count). Two people sharing a link cannot silently overwrite each other: the second request gets `409 Conflict`. A database can replace the in-memory repository without touching the use cases.
+- **Failures are values.** Invalid moves, unknown cubes and revision conflicts are `Result` errors mapped to 400, 404 and 409 in one place, with a plain `ErrorDetails` body.
 - **OpenAPI is the contract.** Frontend types are generated from the backend's OpenAPI document, so the two sides cannot drift unnoticed.
 - **Same-origin.** The frontend calls relative `/api` paths; Vite (dev) or nginx (Docker) proxies them. No CORS, no base URL to configure.
 

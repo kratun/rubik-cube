@@ -23,6 +23,14 @@ public readonly record struct Move(Face Face, Direction Direction)
         ['D'] = Face.Down,
     };
 
+    /// <summary>Formats the move as standard notation; the inverse of <see cref="TryParse"/>.</summary>
+    public string ToNotation()
+    {
+        var face = Face;
+        var letter = FacesByLetter.Single(entry => entry.Value == face).Key;
+        return Direction == Direction.CounterClockwise ? $"{letter}{CounterClockwiseSuffix}" : letter.ToString();
+    }
+
     /// <summary>
     /// Parses one token: a face letter (<c>F R U B L D</c>, upper case) optionally followed by a single <c>'</c>.
     /// Returns false for anything else; never throws. On failure <paramref name="move"/> is the default value.
