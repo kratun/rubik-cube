@@ -19,3 +19,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-2-read-a-cube-session-and-report-errors-fr5-nfr4.md`
   summary: Requests that match no route (unknown path, wrong method such as 405, unsupported media type 415) return the framework's empty 4xx, not `ErrorDetails`, and are not logged by the Api.
   evidence: The mapper and the exception handler only see requests that reach a controller. A `UseStatusCodePages` hook routing empty 4xx responses through `ErrorReporter` would close it; take it after 2.3 adds its routes, with tests for 404, 405 and 415.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-apply-moves-with-a-revision-check-fr6.md`
+  summary: Optional, decide at the quality pass (Story 4.2): switch `CubesController` from one constructor parameter per use case to `[FromServices]` parameters on each action, as a separate small change with no behaviour change.
+  evidence: The constructor takes the use cases plus `ResultMapper` and grows with every operation (Story 2.4 adds two). With `[FromServices]` the constructor stays at `ResultMapper` and each action declares only the use case it calls. A missing registration still fails loudly (500) and the integration tests do not change. Not needed for any story, so it waits unless the constructor becomes a nuisance.
