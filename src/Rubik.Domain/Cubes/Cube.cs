@@ -45,7 +45,39 @@ public sealed class Cube
         Cubies = cubies.AsReadOnly();
     }
 
+    private Cube(IReadOnlyList<Cubie> cubies)
+    {
+        Cubies = cubies;
+    }
+
     public IReadOnlyList<Cubie> Cubies { get; }
+
+    /// <summary>Returns a new cube with the face layer of <paramref name="move"/> turned a quarter turn; this cube is unchanged.</summary>
+    public Cube Apply(Move move)
+    {
+        var faceNormal = move.Face.Normal();
+        var axis = move.Direction switch
+        {
+            Direction.Clockwise => faceNormal,
+            Direction.CounterClockwise => -faceNormal,
+            _ => throw new ArgumentOutOfRangeException(nameof(move), move.Direction, null),
+        };
+
+        return new Cube(Cubies
+            .Select(cubie => IsInLayer(cubie, faceNormal) ? Rotate(cubie, axis) : cubie)
+            .ToList()
+            .AsReadOnly());
+    }
+
+    private static bool IsInLayer(Cubie cubie, Vector3 faceNormal) =>
+        Vector3.Dot(cubie.Position, faceNormal) == OuterLayerProjection;
+
+    private static Cubie Rotate(Cubie cubie, Vector3 axis) => new(
+        cubie.Position.RotateClockwiseAbout(axis),
+        cubie.Stickers
+            .Select(sticker => sticker with { Normal = sticker.Normal.RotateClockwiseAbout(axis) })
+            .ToList()
+            .AsReadOnly());
 
     private static IReadOnlyList<Sticker> SolvedStickersAt(Vector3 position)
     {

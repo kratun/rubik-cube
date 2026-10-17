@@ -16,6 +16,8 @@ The author keeps more detailed .NET and React best-practices references in `docs
 
 - Each `src` project has a `*.Tests` project; the frontend has tests next to the file (`Foo.test.tsx`).
 - Every class or module with logic gets tests in the same change. DTOs, records, DI registration and `Program.cs` are covered by the integration tests instead.
+- Test classes mirror production classes: the tests of `Foo` live in `FooTests` (same folder structure and namespace as `Foo`), one test class per production class. A new method on an existing class gets its tests in that class's existing `FooTests`, not in a new `FooBarTests`. Split only when a file becomes unwieldy, and then by moving data or helpers to `TestHelpers/`, not by adding a second test class for the same type.
+- Test-only helpers (code that exists just to support tests, not a test itself) live in a `TestHelpers/` folder of the test project, namespace `{TestProject}.TestHelpers`, and the class name ends in `TestHelper` (for example `CubeNetTestHelper`). Test helpers do not get their own tests (they add noise; the tests that use them already exercise them). Production code never references a helper.
 - No change is done while its tests are missing or failing. Build with zero warnings.
 
 ## Architecture guardrails
