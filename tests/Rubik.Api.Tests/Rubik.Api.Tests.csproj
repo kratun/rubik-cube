@@ -6,6 +6,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Shared fixtures (see Rubik.Domain.Tests): the same TTC files, so the API is checked against the domain's expected output. -->
+    <Content Include="..\Fixtures\*.txt" Link="Fixtures\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Rubik.Api\Rubik.Api.csproj" />
   </ItemGroup>
 

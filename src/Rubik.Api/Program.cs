@@ -18,6 +18,7 @@ builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<ICubeRepository, InMemoryCubeRepository>();
 builder.Services.AddScoped<CreateCubeUseCase>();
 builder.Services.AddScoped<GetCubeUseCase>();
+builder.Services.AddScoped<ApplyMovesUseCase>();
 builder.Services.AddSingleton<ErrorReporter>();
 builder.Services.AddSingleton<ResultMapper>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

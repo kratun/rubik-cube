@@ -12,4 +12,7 @@ internal sealed class ThrowingCubeRepositoryTestHelper : ICubeRepository
 
     public Task<CubeSession?> GetAsync(Guid cubeId, CancellationToken cancellationToken) =>
         throw new InvalidOperationException(FailureMessage);
+
+    public Task<UpdateOutcome> TryUpdateAsync(string expectedRevision, CubeSession replacement, CancellationToken cancellationToken) =>
+        throw new InvalidOperationException(FailureMessage);
 }

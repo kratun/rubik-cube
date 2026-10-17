@@ -66,7 +66,7 @@ graph LR
 
 - **Binds:** FR-4 to FR-7
 - **Prevents:** service-level locks that break when storage changes; lost updates under concurrent requests
-- **Rule:** `ICubeRepository` exposes `CreateAsync`, `GetAsync` and one compare-and-set `TryUpdateAsync(cubeId, expectedRevision, newMoves)` returning `Updated | RevisionConflict | NotFound`. Apply, undo and reset all compute the new list in Application and go through `TryUpdateAsync`. The in-memory adapter makes the check-and-write atomic per cube. `expectedRevision` is the caller's value and is passed to the compare-and-set unchanged; Application never substitutes the revision it just read. `cubeId` is a `Guid` generated in Application. The repository is registered as a singleton, because a scoped or transient lifetime would lose all sessions.
+- **Rule:** `ICubeRepository` exposes `CreateAsync`, `GetAsync` and one compare-and-set `TryUpdateAsync(expectedRevision, replacement)` returning `Updated | RevisionConflict | NotFound`; `replacement` is the `CubeSession` (id and new moves) because Infrastructure may not reference Domain, so no port signature can name `Move`. Apply, undo and reset all compute the new list in Application and go through `TryUpdateAsync`. The in-memory adapter makes the check-and-write atomic per cube. `expectedRevision` is the caller's value and is passed to the compare-and-set unchanged; Application never substitutes the revision it just read. `cubeId` is a `Guid` generated in Application. The repository is registered as a singleton, because a scoped or transient lifetime would lose all sessions.
 
 ### AD-6 - Failures are values; one mapping to HTTP [ADOPTED]
 

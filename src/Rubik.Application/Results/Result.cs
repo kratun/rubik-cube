@@ -28,5 +28,6 @@ public sealed class Result<T>
 
     public static Result<T> Success(T value) => new(value, error: null);
 
-    public static Result<T> Failure(ApplicationError error) => new(value: default, error);
+    public static Result<T> Failure(ApplicationError error) =>
+        new(value: default, error ?? throw new ArgumentNullException(nameof(error)));
 }

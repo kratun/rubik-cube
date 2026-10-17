@@ -17,4 +17,12 @@ public class CubeSessionTests
 
         Assert.Empty(session.Moves);
     }
+
+    [Fact]
+    public void Revision_Always_IsTheRevisionOfItsMoves()
+    {
+        var session = new CubeSession(Guid.NewGuid(), [FrontTurn]);
+
+        Assert.Equal(CubeRevision.Of([FrontTurn]), session.Revision);
+    }
 }

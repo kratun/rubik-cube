@@ -46,7 +46,7 @@ development_status:
   epic-2: in-progress
   2-1-create-a-cube-session-fr4: done
   2-2-read-a-cube-session-and-report-errors-consistently-fr5-nfr4: done
-  2-3-apply-moves-with-a-revision-check-fr6: backlog
+  2-3-apply-moves-with-a-revision-check-fr6: review
   2-4-undo-and-reset-fr7: backlog
   epic-2-retrospective: optional
 
