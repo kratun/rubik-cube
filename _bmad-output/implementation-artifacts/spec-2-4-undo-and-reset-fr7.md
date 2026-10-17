@@ -2,7 +2,7 @@
 title: 'Story 2.4: Undo and reset (FR7)'
 type: 'feature'
 created: '2026-10-17'
-status: 'in-review'
+status: 'done'
 baseline_commit: 'ae3be97966aaf477f0c7e58f7efe3ee38dd5c069'
 route: 'dispatch'
 review_loop_iteration: 0

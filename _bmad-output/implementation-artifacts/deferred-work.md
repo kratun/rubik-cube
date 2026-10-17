@@ -15,3 +15,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-3-apply-moves-with-a-revision-check-fr6.md`
   summary: Optional, decide at the quality pass (Story 4.2): switch `CubesController` from one constructor parameter per use case to `[FromServices]` parameters on each action, as a separate small change with no behaviour change.
   evidence: The constructor takes the use cases plus `ResultMapper` and grows with every operation (Story 2.4 adds two). With `[FromServices]` the constructor stays at `ResultMapper` and each action declares only the use case it calls. A missing registration still fails loudly (500) and the integration tests do not change. Not needed for any story, so it waits unless the constructor becomes a nuisance.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-undo-and-reset-fr7.md`
+  summary: Adopt CSharpier at the quality pass (Story 4.2): add it as a local tool, format the whole C# code base once, and run `dotnet csharpier check .` as a check (and in CI, Story 5.3).
+  evidence: `.editorconfig` now sets `max_line_length = 120`, but nothing enforces it and about 86 lines in `src` and `tests` are longer (19 over 140), for example the `CubesController` constructor. `dotnet build` does not warn on line length, and `dotnet format` does not wrap lines. CSharpier puts each parameter on its own line with the closing parenthesis on a new line, which is the style written in `CLAUDE.md`. Do the formatting as its own change so the diff is mechanical.
