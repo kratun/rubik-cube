@@ -9,6 +9,7 @@ The author keeps more detailed .NET and React best-practices references in `docs
 - **SOLID**: one reason to change per class (SRP); extend by adding types, not editing working ones (OCP); implementations honour their interface contracts (LSP); small, role-specific interfaces (ISP); depend on abstractions, with ports owned by the inner layer (DIP).
 - **DRY**: one place per piece of knowledge (one rotation function for all faces, one Result-to-HTTP mapping, one fetch wrapper). Do not merge code that is only similar by coincidence.
 - **KISS**: the simplest design that meets the requirement; no speculative abstractions, no patterns without a present need.
+- **No magic values**: no bare numbers, strings or other literals in logic or tests. Give each a named `const`, `static readonly` field, enum or well-named variable (for example `CubieCount`, not `26`). Applies to production code and tests, backend and frontend. Test data that defines the expected value itself (a literal vector or colour in a `[MemberData]` table) is fine.
 - **Exceptions are allowed**, but never silent. Leave a one-line comment at the spot saying which principle is bent and why, and mention it in the PR or commit message.
 
 ## Tests (every project, every file with behaviour)
