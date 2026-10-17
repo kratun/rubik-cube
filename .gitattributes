@@ -1,0 +1,5 @@
+# Normalise line endings: LF in the repository, platform default in the working tree.
+* text=auto
+
+# Fixtures are compared byte for byte (the net lines start with spaces), so keep them LF everywhere.
+tests/Fixtures/*.txt text eol=lf
