@@ -1,3 +1,10 @@
 _bmad/
 .claude/
 docs/local/
+
+bin/
+obj/
+.vs/
+.idea/
+TestResults/
+*.user
