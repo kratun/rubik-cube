@@ -2,7 +2,7 @@
 title: 'Story 2.1: Create a Cube Session (FR4)'
 type: 'feature'
 created: '2026-10-17'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 baseline_commit: '29d4a0f37a174aabd77031c07aa910bec86b03a3'
 review_loop_iteration: 0
