@@ -20,6 +20,11 @@ The author keeps more detailed .NET and React best-practices references in `docs
 - Test-only helpers (code that exists just to support tests, not a test itself) live in a `TestHelpers/` folder of the test project, namespace `{TestProject}.TestHelpers`, and the class name ends in `TestHelper` (for example `CubeNetTestHelper`). Test helpers do not get their own tests (they add noise; the tests that use them already exercise them). Production code never references a helper.
 - No change is done while its tests are missing or failing. Build with zero warnings.
 
+## Before starting a story
+
+- Read `_bmad-output/implementation-artifacts/deferred-work.md`. Take into the story only the entries that fall inside its scope; leave the rest.
+- When a story takes an entry, delete it from `deferred-work.md` in the same change and name the entry in the story spec's Implementation Notes (git history keeps the old text). Do not mark entries as done: a file that only grows stops being read.
+
 ## Architecture guardrails
 
 - Backend dependency direction: Api to Application and Infrastructure; Infrastructure to Application; Application to Domain; Domain depends on nothing. A test enforces it.
