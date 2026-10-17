@@ -4,22 +4,12 @@ namespace Rubik.Domain.Tests.TestHelpers;
 
 /// <summary>
 /// Test helper: reads a cube as one 3x3 net per face, written as three row strings of colour letters.
-/// It lives in the tests on purpose; the production cube exposes no layout (AD-3, story 1.5).
+/// It lives in the tests on purpose: an independent check on <c>ExplodedViewRenderer</c>, which the production cube does not share (AD-3).
 /// </summary>
 internal static class CubeNetTestHelper
 {
     private const int GridSize = 3;
     private const int CentreIndex = 1;
-
-    private static readonly IReadOnlyDictionary<Color, char> Letters = new Dictionary<Color, char>
-    {
-        [Color.White] = 'W',
-        [Color.Yellow] = 'Y',
-        [Color.Green] = 'G',
-        [Color.Blue] = 'B',
-        [Color.Red] = 'R',
-        [Color.Orange] = 'O',
-    };
 
     // For each face: the direction of increasing column and increasing row when the face is viewed from outside,
     // with Up on top and Front below it. Written out by hand, independent of the production mappings.
@@ -45,7 +35,7 @@ internal static class CubeNetTestHelper
 
         return Enumerable.Range(0, GridSize)
             .Select(r => new string(Enumerable.Range(0, GridSize)
-                .Select(c => Letters[ColorAt(stickers, normal, column, row, r, c)])
+                .Select(c => ColorAt(stickers, normal, column, row, r, c).Letter())
                 .ToArray()))
             .ToList();
     }

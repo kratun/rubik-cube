@@ -4,4 +4,9 @@
     <ProjectReference Include="..\..\src\Rubik.Domain\Rubik.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Shared fixtures: one source of the TTC Test Sequence and its expected output. Test projects that need them (API, UI) include the same tests/Fixtures files. -->
+    <Content Include="..\Fixtures\*.txt" Link="Fixtures\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
