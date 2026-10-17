@@ -29,5 +29,6 @@ The author keeps more detailed .NET and React best-practices references in `docs
 ## Architecture guardrails
 
 - Backend dependency direction: Api to Application and Infrastructure; Infrastructure to Application; Application to Domain; Domain depends on nothing. A test enforces it.
+- A class receives its collaborators through its constructor. Do not create a collaborator with `new` inside another class (a hidden dependency, for example a helper built from a repository the class only passes on); register it in `Program.cs` and inject it. Data types, records and plain values are fine to create with `new`.
 - Frontend talks to the backend only through relative `/api/...` paths and the generated OpenAPI types.
 - No demo code, template leftovers or unused files.

@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-17-2026 12:00
-last_updated: 10-18-2026 00:10
+last_updated: 10-18-2026 00:59
 project: rubik-cube
 project_key: NOKEY
 tracking_system: file-system
@@ -48,7 +48,7 @@ development_status:
   2-2-read-a-cube-session-and-report-errors-consistently-fr5-nfr4: done
   2-3-apply-moves-with-a-revision-check-fr6: done
   2-4-undo-and-reset-fr7: done
-  epic-2-retrospective: optional
+  epic-2-retrospective: done
 
   epic-3: backlog
   3-1-frontend-scaffold-with-generated-api-types-and-a-typed-clien: backlog
@@ -77,7 +77,7 @@ action_items:
     action: "Add .gitattributes (text=auto; tests/Fixtures/*.txt eol=lf); done in
       the retro, awaiting commit"
     owner: "Drago"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-17.md"
   - id: "epic-1-retro-item-2-when-planning-stories-2-3-and-2-4-read-d"
     epic: 1
@@ -86,7 +86,7 @@ action_items:
       to Move.FacesByLetter; 2.4 checks whether undo can be recomputed from the move
       list before adding Cube value equality"
     owner: "Drago"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-17.md"
   - id: "epic-1-retro-item-3-when-the-first-api-test-project-is-creat"
     epic: 1
@@ -94,7 +94,7 @@ action_items:
       (or move the item to a shared tests/Directory.Build.targets) and read the TTC
       sequence from the fixture"
     owner: "Drago"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-17.md"
   - id: "epic-1-retro-item-4-keep-one-story-per-pr-with-a-review-per"
     epic: 1
@@ -103,3 +103,32 @@ action_items:
     owner: "Drago"
     status: open
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-2026-10-17.md"
+  - id: "epic-2-retro-item-5-split-cubescontrollertests-move-shared-c"
+    epic: 2
+    action: "Split CubesControllerTests: move shared client, log and JSON helpers
+      to Rubik.Api.Tests/TestHelpers at the quality pass (Story 4.2)"
+    owner: "Drago"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-18.md"
+  - id: "epic-2-retro-item-6-adopt-csharpier-at-story-4-2-local-tool"
+    epic: 2
+    action: "Adopt CSharpier at Story 4.2: local tool, one mechanical reformat, dotnet
+      csharpier check . as a check (deferred-work.md entry exists)"
+    owner: "Drago"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-18.md"
+  - id: "epic-2-retro-item-7-move-commit-e20b768-off-local-main-onto"
+    epic: 2
+    action: "Move commit e20b768 off local main onto chore/mark-story-2-4-done and
+      open the mark-done PR like earlier stories"
+    owner: "Drago"
+    status: done
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-18.md"
+  - id: "epic-2-retro-item-8-in-review-of-application-classes-flag-a"
+    epic: 2
+    action: "In review of Application classes, flag a collaborator created with new
+      inside another class as a hidden dependency (missed by the generic review layers
+      in 2.4)"
+    owner: "Drago"
+    status: done
+    ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-18.md"
