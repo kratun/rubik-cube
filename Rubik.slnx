@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Rubik.Api/Rubik.Api.csproj" />
+    <Project Path="src/Rubik.Application/Rubik.Application.csproj" />
+    <Project Path="src/Rubik.Domain/Rubik.Domain.csproj" />
+    <Project Path="src/Rubik.Infrastructure/Rubik.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Rubik.Api.Tests/Rubik.Api.Tests.csproj" />
+    <Project Path="tests/Rubik.Application.Tests/Rubik.Application.Tests.csproj" />
+    <Project Path="tests/Rubik.Domain.Tests/Rubik.Domain.Tests.csproj" />
+    <Project Path="tests/Rubik.Infrastructure.Tests/Rubik.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
