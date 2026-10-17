@@ -6,7 +6,7 @@ namespace Rubik.Api.Cubes;
 
 [ApiController]
 [Route(CubesRoute)]
-public class CubesController(CreateCubeUseCase createCube, GetCubeUseCase getCube, ApplyMovesUseCase applyMoves, ResultMapper resultMapper) : ControllerBase
+public class CubesController(CreateCubeUseCase createCube, GetCubeUseCase getCube, ApplyMovesUseCase applyMoves, UndoUseCase undo, ResetUseCase reset, ResultMapper resultMapper) : ControllerBase
 {
     public const string CubesRoute = "api/cubes";
 
@@ -40,6 +40,30 @@ public class CubesController(CreateCubeUseCase createCube, GetCubeUseCase getCub
     public async Task<IActionResult> ApplyMoves(Guid id, ApplyMovesRequest request, CancellationToken cancellationToken)
     {
         var result = await applyMoves.ExecuteAsync(id, request.ExpectedRevision, request.Moves, cancellationToken);
+        return resultMapper.ToActionResult(result, HttpContext);
+    }
+
+    [HttpPost("{id}/undo")]
+    [ProducesResponseType<CubeState>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ErrorDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Undo(Guid id, ExpectedRevisionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await undo.ExecuteAsync(id, request.ExpectedRevision, cancellationToken);
+        return resultMapper.ToActionResult(result, HttpContext);
+    }
+
+    [HttpPost("{id}/reset")]
+    [ProducesResponseType<CubeState>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ErrorDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ErrorDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Reset(Guid id, ExpectedRevisionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await reset.ExecuteAsync(id, request.ExpectedRevision, cancellationToken);
         return resultMapper.ToActionResult(result, HttpContext);
     }
 }
