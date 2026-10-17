@@ -33,6 +33,11 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     private const string GetOperation = "Cubes.Get";
     private const string CreateOperation = "Cubes.Create";
     private const string ApplyMovesOperation = "Cubes.ApplyMoves";
+    private const string UndoAction = "undo";
+    private const string ResetAction = "reset";
+    private const string UndoOperation = "Cubes.Undo";
+    private const string ResetOperation = "Cubes.Reset";
+    private const int ParallelRequests = 2;
     private const string FrontToken = "F";
     private const string RightPrimeToken = "R'";
     private const string StaleRevision = "stale";
@@ -355,6 +360,176 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
         await AssertInternalErrorAsync(response, logs, ApplyMovesOperation, cubeId.ToString());
     }
 
+    [Fact]
+    public async Task PostUndo_AfterMoves_Returns200WithTheLastMoveRemovedAndTheShortenedRevision()
+    {
+        var created = await CreateStateAsync();
+        var applied = await ReadStateAsync(await PostMovesAsync(client, created.CubeId, created.Revision, [FrontToken, RightPrimeToken]));
+
+        var response = await PostExpectedRevisionAsync(client, created.CubeId, UndoAction, applied.Revision);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var root = (await ReadBodyAsync(response)).RootElement;
+        Assert.Equal(RevisionOf([FrontToken]), root.GetProperty(RevisionProperty).GetString());
+        Assert.Equal([FrontToken], root.GetProperty(MovesProperty).EnumerateArray().Select(move => move.GetString()));
+        await AssertRevisionAsync(client, created.CubeId, RevisionOf([FrontToken]));
+    }
+
+    [Fact]
+    public async Task PostReset_AfterTtcSequence_Returns200WithNoMovesTheEmptyRevisionAndTheSolvedState()
+    {
+        var created = await CreateStateAsync();
+        var applied = await ReadStateAsync(await PostMovesAsync(client, created.CubeId, created.Revision, TtcFixtureTestHelper.Tokens));
+
+        var response = await PostExpectedRevisionAsync(client, created.CubeId, ResetAction, applied.Revision);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var root = (await ReadBodyAsync(response)).RootElement;
+        Assert.Equal(NewCubeRevision, root.GetProperty(RevisionProperty).GetString());
+        Assert.Equal(NoMoves, root.GetProperty(MovesProperty).GetArrayLength());
+        Assert.Equal(SolvedLines, root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString()));
+        await AssertRevisionAsync(client, created.CubeId, NewCubeRevision);
+    }
+
+    [Theory]
+    [InlineData(UndoAction)]
+    [InlineData(ResetAction)]
+    public async Task PostUndoOrReset_EmptySession_Returns200WithTheSolvedStateAndTheSameRevision(string action)
+    {
+        var created = await CreateStateAsync();
+
+        var response = await PostExpectedRevisionAsync(client, created.CubeId, action, created.Revision);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var root = (await ReadBodyAsync(response)).RootElement;
+        Assert.Equal(created.Revision, root.GetProperty(RevisionProperty).GetString());
+        Assert.Equal(NoMoves, root.GetProperty(MovesProperty).GetArrayLength());
+        Assert.Equal(SolvedLines, root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString()));
+    }
+
+    [Theory]
+    [InlineData(UndoAction, UndoOperation)]
+    [InlineData(ResetAction, ResetOperation)]
+    public async Task PostUndoOrReset_StaleRevision_Returns409WithOneWarningAndLeavesTheSessionUnchanged(string action, string operation)
+    {
+        var (testClient, logs) = CreateLoggingClient();
+        var created = await CreateStateAsync(testClient);
+        var applied = await ReadStateAsync(await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken]));
+
+        var response = await PostExpectedRevisionAsync(testClient, created.CubeId, action, StaleRevision);
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        var root = (await ReadBodyAsync(response)).RootElement;
+        Assert.Equal((int)HttpStatusCode.Conflict, root.GetProperty(StatusProperty).GetInt32());
+        var record = SingleFailure(logs);
+        Assert.Equal(LogLevel.Warning, record.Level);
+        Assert.Null(record.Exception);
+        var state = StateOf(record);
+        Assert.Equal(root.GetProperty(TraceIdProperty).GetString(), state[ErrorReporter.TraceIdKey]);
+        Assert.Equal(created.CubeId.ToString(), state[ErrorReporter.CubeIdKey]);
+        Assert.Equal(operation, state[ErrorReporter.OperationKey]);
+        await AssertRevisionAsync(testClient, created.CubeId, applied.Revision);
+    }
+
+    [Theory]
+    [InlineData(UndoAction)]
+    [InlineData(ResetAction)]
+    public async Task PostUndoOrReset_TwoParallelRequestsWithTheSameRevision_ExactlyOneSucceedsAndTheOtherConflicts(string action)
+    {
+        var (testClient, logs) = CreateLoggingClient();
+        var created = await CreateStateAsync(testClient);
+        var applied = await ReadStateAsync(await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken, RightPrimeToken]));
+        var gate = new TaskCompletionSource();
+
+        var requests = Enumerable.Range(0, ParallelRequests)
+            .Select(_ => Task.Run(async () =>
+            {
+                await gate.Task;
+                return await PostExpectedRevisionAsync(testClient, created.CubeId, action, applied.Revision);
+            }))
+            .ToList();
+        gate.SetResult();
+        var responses = await Task.WhenAll(requests);
+
+        Assert.Equal(
+            [HttpStatusCode.OK, HttpStatusCode.Conflict],
+            responses.Select(response => response.StatusCode).Order());
+        var winner = responses.Single(response => response.StatusCode == HttpStatusCode.OK);
+        var winnerRoot = (await ReadBodyAsync(winner)).RootElement;
+        await AssertRevisionAsync(testClient, created.CubeId, winnerRoot.GetProperty(RevisionProperty).GetString()!);
+        Assert.Equal(LogLevel.Warning, SingleFailure(logs).Level);
+    }
+
+    [Theory]
+    [InlineData(UndoAction, "{}")]
+    [InlineData(UndoAction, "{\"expectedRevision\":\"\"}")]
+    [InlineData(UndoAction, "{\"expectedRevision\":null}")]
+    [InlineData(UndoAction, "null")]
+    [InlineData(UndoAction, "")]
+    [InlineData(ResetAction, "{}")]
+    [InlineData(ResetAction, "{\"expectedRevision\":\"\"}")]
+    [InlineData(ResetAction, "{\"expectedRevision\":null}")]
+    [InlineData(ResetAction, "null")]
+    [InlineData(ResetAction, "")]
+    public async Task PostUndoOrReset_MissingOrEmptyRevision_Returns400WithOneWarningAndLeavesTheSessionUnchanged(string action, string body)
+    {
+        var (testClient, logs) = CreateLoggingClient();
+        var created = await CreateStateAsync(testClient);
+        var applied = await ReadStateAsync(await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken]));
+
+        var response = await testClient.PostAsync(
+            $"{CubesPath}/{created.CubeId}/{action}",
+            new StringContent(body, Encoding.UTF8, JsonContentType),
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal((int)HttpStatusCode.BadRequest, (await ReadBodyAsync(response)).RootElement.GetProperty(StatusProperty).GetInt32());
+        Assert.Equal(LogLevel.Warning, SingleFailure(logs).Level);
+        await AssertRevisionAsync(testClient, created.CubeId, applied.Revision);
+    }
+
+    [Theory]
+    [InlineData(UndoAction)]
+    [InlineData(ResetAction)]
+    public async Task PostUndoOrReset_MalformedId_Returns400WithOneWarning(string action)
+    {
+        var (testClient, logs) = CreateLoggingClient();
+
+        var response = await testClient.PostAsJsonAsync(
+            $"{CubesPath}/{MalformedId}/{action}",
+            new { expectedRevision = StaleRevision },
+            TestContext.Current.CancellationToken);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(LogLevel.Warning, SingleFailure(logs).Level);
+    }
+
+    [Theory]
+    [InlineData(UndoAction)]
+    [InlineData(ResetAction)]
+    public async Task PostUndoOrReset_UnknownCube_Returns404WithOneWarning(string action)
+    {
+        var (testClient, logs) = CreateLoggingClient();
+
+        var response = await PostExpectedRevisionAsync(testClient, Guid.NewGuid(), action, StaleRevision);
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal(LogLevel.Warning, SingleFailure(logs).Level);
+    }
+
+    [Theory]
+    [InlineData(UndoAction, UndoOperation)]
+    [InlineData(ResetAction, ResetOperation)]
+    public async Task PostUndoOrReset_RepositoryThrows_Returns500WithoutStackTraceAndOneErrorWithTheException(string action, string operation)
+    {
+        var (testClient, logs) = CreateLoggingClient(services => services.AddSingleton<ICubeRepository, ThrowingCubeRepositoryTestHelper>());
+
+        var cubeId = Guid.NewGuid();
+        var response = await PostExpectedRevisionAsync(testClient, cubeId, action, StaleRevision);
+
+        await AssertInternalErrorAsync(response, logs, operation, cubeId.ToString());
+    }
+
     private static async Task AssertInternalErrorAsync(HttpResponseMessage response, FakeLogCollector logs, string operation, string? cubeId)
     {
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
@@ -401,6 +576,20 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
             $"{CubesPath}/{cubeId}/moves",
             new { expectedRevision, moves },
             TestContext.Current.CancellationToken);
+
+    private static async Task<HttpResponseMessage> PostExpectedRevisionAsync(
+        HttpClient testClient, Guid cubeId, string action, string expectedRevision) =>
+        await testClient.PostAsJsonAsync(
+            $"{CubesPath}/{cubeId}/{action}",
+            new { expectedRevision },
+            TestContext.Current.CancellationToken);
+
+    private static async Task<(Guid CubeId, string Revision)> ReadStateAsync(HttpResponseMessage response)
+    {
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var root = (await ReadBodyAsync(response)).RootElement;
+        return (root.GetProperty(CubeIdProperty).GetGuid(), root.GetProperty(RevisionProperty).GetString()!);
+    }
 
     private static string RevisionOf(IEnumerable<string> tokens) =>
         Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(string.Join(MoveSeparator, tokens))));

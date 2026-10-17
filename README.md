@@ -34,3 +34,41 @@ B G O W W W O Y R Y Y W
 ```
 
 The same sequence and expected output are stored in `tests/Fixtures/` and reused by the later API and UI tests.
+
+## Try the API
+
+Commands are for bash (on Windows use Git Bash). Start the API (it listens on port 5080; Swagger UI is at <http://localhost:5080/swagger> in Development):
+
+```bash
+dotnet run --project src/Rubik.Api
+```
+
+In a second terminal, create a cube. The response holds the `cubeId` and the `revision` of the empty move list; use them in the commands below:
+
+```bash
+curl -X POST http://localhost:5080/api/cubes
+```
+
+Apply the TTC Test Sequence. `expectedRevision` is the `revision` you last received; a stale one gives `409`: read the cube again with `GET` and retry. Replace `<cubeId>` and `<revision>` by hand. The `explodedView` in the response is the exploded view shown under "Run the tests" above:
+
+```bash
+curl -X POST http://localhost:5080/api/cubes/<cubeId>/moves \
+  -H "Content-Type: application/json" \
+  --data-binary @- <<'JSON'
+{"expectedRevision":"<revision>","moves":["F","R'","U","B'","L","D'"]}
+JSON
+```
+
+Undo the last move, then reset the cube (use the `revision` from the previous response each time):
+
+```bash
+curl -X POST http://localhost:5080/api/cubes/<cubeId>/undo \
+  -H "Content-Type: application/json" \
+  -d '{"expectedRevision":"<revision>"}'
+
+curl -X POST http://localhost:5080/api/cubes/<cubeId>/reset \
+  -H "Content-Type: application/json" \
+  -d '{"expectedRevision":"<revision>"}'
+```
+
+Read the current state at any time with `curl http://localhost:5080/api/cubes/<cubeId>`.

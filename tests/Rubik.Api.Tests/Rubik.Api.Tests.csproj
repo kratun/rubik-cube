@@ -11,6 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The README repeats the TTC expected output (it must be readable without running anything); ReadmeTests ties it to the fixtures. -->
+    <Content Include="..\..\README.md" Link="README.md" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\Rubik.Api\Rubik.Api.csproj" />
   </ItemGroup>
 

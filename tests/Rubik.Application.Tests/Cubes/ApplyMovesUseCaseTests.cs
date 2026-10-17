@@ -21,7 +21,7 @@ public class ApplyMovesUseCaseTests
 
     private readonly CubeRepositoryTestHelper repository = new();
 
-    private ApplyMovesUseCase UseCase => new(repository);
+    private ApplyMovesUseCase UseCase => new(new RevisionCheckedUpdate(repository));
 
     [Fact]
     public async Task ExecuteAsync_CurrentRevision_AppendsTheMovesAndReturnsTheNewState()
