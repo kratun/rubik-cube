@@ -2,7 +2,7 @@
 title: 'Story 2.3: Apply moves with a revision check (FR6)'
 type: 'feature'
 created: '2026-10-17'
-status: 'in-review'
+status: 'done'
 baseline_commit: '6d26f3ae3740f67296b35ce1e78dd9115c0420e4'
 route: 'dispatch'
 review_loop_iteration: 0
