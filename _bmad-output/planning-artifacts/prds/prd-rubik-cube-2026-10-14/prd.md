@@ -39,7 +39,7 @@ Cubers who want a solver, or anyone needing multi-user or persisted cubes.
 - **Solved State** — each Face a single colour: Green Front, Red Right, White Up, Blue Back, Orange Left, Yellow Down.
 - **Exploded View** — the 2D net of all six Faces defined by the task (PDF page 2): Up above Front, Down below Front, and Left, Front, Right, Back in one row.
 - **Cube Session** — a server-held Cube identified by a `cubeId`, stored as its ordered Move list; the Cube is derived from it.
-- **Version** — the number of Moves in a Cube Session's Move list. Every mutating request states the Version it expects; a mismatch is a conflict.
+- **Revision** — a text token derived from a Cube Session's Move list alone (equal lists give equal Revisions, any other list a different one). It is not the number of Moves: undo and new Moves can bring the count back to an earlier number with a different history. Every mutating request states the Revision it expects; a mismatch is a conflict.
 - **TTC Test Sequence** — `F R' U B' L D'`.
 
 ## 4. Features
@@ -92,22 +92,22 @@ B G O W W W O Y R Y Y W
 The API creates a Cube Session in the Solved State and returns its `cubeId`.
 
 **Consequences (testable):**
-- The response contains a `cubeId`, the Solved State faces and Version 0.
+- The response contains a `cubeId`, the Solved State faces and the Revision of an empty Move list.
 - Two sessions do not affect each other.
 
 #### FR-5: Read a Cube Session
-The API returns the Faces, the Exploded View, the Move list and the Version of a Cube Session.
+The API returns the Faces, the Exploded View, the Move list and the Revision of a Cube Session.
 
 **Consequences (testable):**
 - An unknown `cubeId` returns HTTP 404 with a ErrorDetails body.
 
 #### FR-6: Apply Moves
-The API appends the Moves to the Cube Session, given the Version the caller expects, and returns the new state.
+The API appends the Moves to the Cube Session, given the Revision the caller expects, and returns the new state.
 
 **Consequences (testable):**
-- A request whose expected Version differs from the session's Version returns HTTP 409 with a ErrorDetails body, and the session is unchanged.
-- A successful request increases the Version by the number of Moves applied.
-- Two concurrent requests with the same expected Version: exactly one succeeds, the other gets 409.
+- A request whose expected Revision differs from the session's Revision returns HTTP 409 with a ErrorDetails body, and the session is unchanged.
+- A successful request changes the Revision to the one of the new Move list.
+- Two concurrent requests with the same expected Revision: exactly one succeeds, the other gets 409.
 - The TTC Test Sequence on a new session returns Faces equal to FR-3's expected output.
 - An unknown move token returns HTTP 400 with a ErrorDetails body naming the token, and the session is unchanged.
 
@@ -117,7 +117,7 @@ The API removes the last Move (undo) or returns the session to the Solved State 
 **Consequences (testable):**
 - Undo yields the state before the last Move; undo on an empty session leaves the Solved State.
 - Reset yields an empty Move list and the Solved State.
-- Undo and reset follow the same expected-Version rule as FR-6: a mismatch returns HTTP 409 and changes nothing.
+- Undo and reset follow the same expected-Revision rule as FR-6: a mismatch returns HTTP 409 and changes nothing.
 
 ### 4.4 Web UI
 **Description:** A React single-page app, separate from the backend, that holds only the `cubeId` and renders what the API returns. Realizes UJ-1, UJ-2.

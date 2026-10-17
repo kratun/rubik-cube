@@ -43,10 +43,10 @@ development_status:
   1-5-exploded-view-and-the-ttc-test-sequence-fr3: done
   epic-1-retrospective: done
 
-  epic-2: backlog
-  2-1-create-a-cube-session-fr4: backlog
+  epic-2: in-progress
+  2-1-create-a-cube-session-fr4: review
   2-2-read-a-cube-session-and-report-errors-consistently-fr5-nfr4: backlog
-  2-3-apply-moves-with-a-version-check-fr6: backlog
+  2-3-apply-moves-with-a-revision-check-fr6: backlog
   2-4-undo-and-reset-fr7: backlog
   epic-2-retrospective: optional
 

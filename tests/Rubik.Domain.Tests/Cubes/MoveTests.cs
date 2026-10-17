@@ -77,6 +77,24 @@ public class MoveTests
         Assert.Equal(default, move);
     }
 
+    [Theory]
+    [MemberData(nameof(ValidTokens))]
+    public void ToNotation_ValidMove_ReturnsItsToken(string token, Face face, Direction direction)
+    {
+        Assert.Equal(token, new Move(face, direction).ToNotation());
+    }
+
+    [Theory]
+    [MemberData(nameof(ValidTokens))]
+    public void TryParse_ThenToNotation_ReturnsTheSameToken(string token, Face face, Direction direction)
+    {
+        var parsed = Move.TryParse(token, out var move);
+
+        Assert.True(parsed);
+        Assert.Equal(new Move(face, direction), move);
+        Assert.Equal(token, move.ToNotation());
+    }
+
     [Fact]
     public void TryParse_NullToken_ReturnsFalseWithoutThrowing()
     {
