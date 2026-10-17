@@ -22,7 +22,7 @@ public sealed record CubeState(
 
         return new CubeState(
             session.CubeId,
-            CubeRevision.Of(session.Moves),
+            session.Revision,
             session.Moves.Select(move => move.ToNotation()).ToList(),
             view.Faces.ToDictionary(
                 face => face.Key.ToString().ToLowerInvariant(),

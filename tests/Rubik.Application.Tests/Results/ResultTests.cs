@@ -28,4 +28,10 @@ public class ResultTests
         Assert.Same(error, result.Error);
         Assert.Throws<InvalidOperationException>(() => result.Value);
     }
+
+    [Fact]
+    public void Failure_NullError_Throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => Result<string>.Failure(null!));
+    }
 }

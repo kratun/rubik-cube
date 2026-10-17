@@ -25,7 +25,7 @@ A reviewer can create a cube, read it, turn it, undo and reset it through Swagge
 
 - Hexagonal layering: Api -> Application, Infrastructure; Infrastructure -> Application; Application -> Domain; an architecture test enforces it. Api and Infrastructure cannot reference Domain, so the Application read model `CubeState` carries no Domain types and the controller returns it directly.
 - A session stores `{ cubeId, moves[] }` only; the cube is rebuilt by replay on each read.
-- `ICubeRepository` owns atomicity: `CreateAsync`, `GetAsync`, and (2.3) compare-and-set `TryUpdateAsync(cubeId, expectedRevision, newMoves)`. Repository is a singleton. `CubeSession` stays a class (reference comparison).
+- `ICubeRepository` owns atomicity: `CreateAsync`, `GetAsync`, and (2.3) compare-and-set `TryUpdateAsync(expectedRevision, replacement)`. Repository is a singleton. `CubeSession` stays a class (reference comparison).
 - Failures are values: `Result<T>` with typed errors in Application (`InvalidMove`, `CubeNotFound`, `RevisionConflict`). One Result-to-HTTP mapper and one global exception handler in Api.
 - Logging (AD-12): only Api logs. Expected failures at Warning without exception; unexpected at Error with exception. Each entry carries `operation`, `cubeId` when known, `status`, `traceId`; the same traceId is in the body. Tests use `FakeLogger`.
 - Swagger is served in Development only. JSON camelCase; face keys `up left front right back down`; colours as names.

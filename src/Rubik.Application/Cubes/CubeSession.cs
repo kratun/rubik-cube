@@ -11,9 +11,13 @@ public sealed class CubeSession
 
         // A private copy, so nobody can change a stored session through the list they passed in.
         Moves = moves.ToArray();
+        Revision = CubeRevision.Of(Moves);
     }
 
     public Guid CubeId { get; }
 
     public IReadOnlyList<Move> Moves { get; }
+
+    /// <summary>The revision of <see cref="Moves"/>, derived once when the session is built.</summary>
+    public string Revision { get; }
 }
