@@ -37,7 +37,7 @@ story_location: _bmad-output/implementation-artifacts
 development_status:
   epic-1: in-progress
   1-1-solution-scaffold-with-a-clean-build: done
-  1-2-solved-cube-with-the-correct-orientation-fr1: review
+  1-2-solved-cube-with-the-correct-orientation-fr1: done
   1-3-strict-move-parsing-part-of-fr2: backlog
   1-4-turn-any-face-fr2: backlog
   1-5-exploded-view-and-the-ttc-test-sequence-fr3: backlog
