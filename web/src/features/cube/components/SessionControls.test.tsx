@@ -215,7 +215,7 @@ describe("SessionControls", () => {
       BUSY_ATTRIBUTE,
       BUSY_ON,
     );
-    expect(screen.getByText(BUSY_LABEL)).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(BUSY_LABEL);
     expect(screen.getByRole("button", { name: UNDO_LABEL })).toBeEnabled();
     expect(screen.getByRole("button", { name: RESET_LABEL })).toBeEnabled();
     expect(screen.getByRole("button", { name: TTC_LABEL })).toBeEnabled();

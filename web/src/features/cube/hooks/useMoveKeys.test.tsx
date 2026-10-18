@@ -8,6 +8,7 @@ const COUNTER_CLOCKWISE_TOKEN = "F'";
 const MODIFIERS = ["Control", "Alt", "Meta"];
 const NOT_MOVE_KEY = "x";
 const FIELD_LABEL = "Notes";
+const CHECKBOX_LABEL = "Switch";
 const BUTTON_LABEL = "Focus";
 const DIALOG_BUTTON_LABEL = "Close";
 
@@ -15,15 +16,33 @@ function withModifier(modifier: string, key: string): string {
   return `{${modifier}>}${key}{/${modifier}}`;
 }
 
-function renderKeys() {
+function renderKeys(enabled = true) {
   const onMove = vi.fn();
   const view = renderHook(() => {
-    useMoveKeys(onMove);
+    useMoveKeys(onMove, enabled);
   });
   return { onMove, ...view };
 }
 
 describe("useMoveKeys", () => {
+  it("still sends the move while a checkbox has focus", async () => {
+    const { onMove } = renderKeys();
+    render(<input type="checkbox" aria-label={CHECKBOX_LABEL} />);
+    screen.getByRole("checkbox", { name: CHECKBOX_LABEL }).focus();
+
+    await userEvent.keyboard(CLOCKWISE_KEY);
+
+    expect(onMove).toHaveBeenCalledExactlyOnceWith(CLOCKWISE_KEY);
+  });
+
+  it("sends no move while the shortcuts are switched off", async () => {
+    const { onMove } = renderKeys(false);
+
+    await userEvent.keyboard(CLOCKWISE_KEY);
+
+    expect(onMove).not.toHaveBeenCalled();
+  });
+
   it("sends the clockwise move for an upper-case letter", async () => {
     const { onMove } = renderKeys();
 
@@ -95,7 +114,7 @@ describe("useMoveKeys", () => {
   it("ignores keys pressed inside a modal dialog", async () => {
     const onMove = vi.fn();
     function Page() {
-      useMoveKeys(onMove);
+      useMoveKeys(onMove, true);
       return (
         <div role="dialog" aria-modal="true" aria-label="Dialog">
           <button type="button">{DIALOG_BUTTON_LABEL}</button>

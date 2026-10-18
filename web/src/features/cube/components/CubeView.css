@@ -67,14 +67,10 @@
   grid-area: down;
 }
 
+/* The light ring keeps the edge of every tile at 3:1 or more against the board (1.4.11), also for blue, red and green. */
 .tile {
   border: 2px solid var(--colour-tile-edge);
   border-radius: 4px;
-}
-
-/* A light ring on the light tiles keeps their edge visible on any background. */
-.tile[data-colour="White"],
-.tile[data-colour="Yellow"] {
   box-shadow: 0 0 0 1px var(--colour-light-tile-ring);
 }
 

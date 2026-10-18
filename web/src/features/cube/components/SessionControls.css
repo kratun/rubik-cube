@@ -7,8 +7,7 @@
 }
 
 .session-controls .group-label,
-.button-primary,
-.busy-cue {
+.button-primary {
   grid-column: 1 / -1;
 }
 
@@ -31,6 +30,7 @@
 }
 
 .busy-cue {
+  display: block;
   min-height: 1.5rem;
   color: var(--colour-muted);
   font-style: italic;

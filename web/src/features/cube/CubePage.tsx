@@ -5,6 +5,7 @@ import { ExplodedView } from "./components/ExplodedView";
 import { MoveHistory } from "./components/MoveHistory";
 import { MovePad } from "./components/MovePad";
 import { SessionControls } from "./components/SessionControls";
+import { ShortcutsToggle } from "./components/ShortcutsToggle";
 import { cubeIdFromPath } from "./utils/sessionUrl";
 import { useCubeSession } from "./hooks/useCubeSession";
 import { useMoveKeys } from "./hooks/useMoveKeys";
@@ -18,7 +19,8 @@ export function CubePage() {
   const [cubeId] = useState(() => cubeIdFromPath(window.location.pathname));
   const { state, busy, startNewCube, applyMove, undo, reset, applyTtcSequence } =
     useCubeSession(cubeId);
-  useMoveKeys(applyMove);
+  const [shortcutsEnabled, setShortcutsEnabled] = useState(true);
+  useMoveKeys(applyMove, shortcutsEnabled);
   const [explodedViewOpen, setExplodedViewOpen] = useState(false);
   const openExplodedView = useCallback(() => {
     setExplodedViewOpen(true);
@@ -55,6 +57,7 @@ export function CubePage() {
                 onShowExplodedView={openExplodedView}
               />
               <MovePad onMove={applyMove} busy={busy} />
+              <ShortcutsToggle enabled={shortcutsEnabled} onChange={setShortcutsEnabled} />
               <MoveHistory moves={state.cube.moves} />
             </div>
           </div>

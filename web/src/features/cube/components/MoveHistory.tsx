@@ -3,6 +3,9 @@ import "./MoveHistory.css";
 
 export const HISTORY_HEADING = "History";
 export const NO_MOVES_MESSAGE = "No moves yet";
+export const EMPTY_HISTORY_STATUS = "History is empty";
+export const lastMoveStatus = (last: string, total: number) =>
+  `Last move: ${last}, ${String(total)} in total`;
 
 const HISTORY_HEADING_ID = "move-history-heading";
 
@@ -13,6 +16,7 @@ interface MoveHistoryProps {
 /** The moves of the session in the order the API reports them; nothing is derived here (AD-9). */
 export function MoveHistory({ moves }: MoveHistoryProps) {
   const list = useRef<HTMLOListElement>(null);
+  const last = moves.at(-1);
 
   // The list scrolls when it is long; keep the newest move in view.
   useEffect(() => {
@@ -26,6 +30,9 @@ export function MoveHistory({ moves }: MoveHistoryProps) {
       <h2 id={HISTORY_HEADING_ID} className="group-label">
         {HISTORY_HEADING}
       </h2>
+      <p role="status" className="visually-hidden">
+        {last === undefined ? EMPTY_HISTORY_STATUS : lastMoveStatus(last, moves.length)}
+      </p>
       {moves.length === 0 ? (
         <p>{NO_MOVES_MESSAGE}</p>
       ) : (
