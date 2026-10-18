@@ -52,7 +52,7 @@ development_status:
 
   epic-3: in-progress
   3-1-frontend-scaffold-with-generated-api-types-and-a-typed-clien: done
-  3-2-show-the-cube-and-keep-the-session-in-the-url-fr8: backlog
+  3-2-show-the-cube-and-keep-the-session-in-the-url-fr8: review
   3-3-apply-moves-by-buttons-and-keyboard-fr9: backlog
   3-4-move-history-undo-and-reset-fr11: backlog
   3-5-ttc-test-sequence-in-one-click-and-the-end-to-end-check-fr10: backlog

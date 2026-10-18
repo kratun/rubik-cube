@@ -1,0 +1,71 @@
+/* Colour names come from the API; this file only paints them. */
+.cube-net {
+  display: grid;
+  grid-template-areas:
+    ". up . ."
+    "left front right back"
+    ". down . .";
+  grid-template-columns: repeat(4, max-content);
+  gap: 0.5rem;
+  margin-block: 1rem;
+}
+
+.face {
+  display: grid;
+  grid-template-columns: repeat(3, 2.5rem);
+  grid-auto-rows: 2.5rem;
+  gap: 2px;
+}
+
+.face-up {
+  grid-area: up;
+}
+
+.face-left {
+  grid-area: left;
+}
+
+.face-front {
+  grid-area: front;
+}
+
+.face-right {
+  grid-area: right;
+}
+
+.face-back {
+  grid-area: back;
+}
+
+.face-down {
+  grid-area: down;
+}
+
+.tile {
+  border: 1px solid #222;
+  border-radius: 3px;
+}
+
+.tile[data-colour="White"] {
+  background: #fff;
+}
+
+.tile[data-colour="Yellow"] {
+  background: #ffd500;
+}
+
+.tile[data-colour="Orange"] {
+  background: #ff8c00;
+}
+
+.tile[data-colour="Red"] {
+  background: #d00000;
+}
+
+.tile[data-colour="Green"] {
+  background: #009b48;
+}
+
+.tile[data-colour="Blue"] {
+  background: #0046ad;
+}
