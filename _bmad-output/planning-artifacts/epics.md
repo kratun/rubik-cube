@@ -92,10 +92,56 @@ A cube can be created, turned, undone and reset through Swagger or curl; concurr
 **FRs covered:** FR4, FR5, FR6, FR7
 
 ### Epic 3: Interactive web interface
-A reviewer sees the cube as coloured tiles and text, turns it by buttons and keys, reviews history, undoes, resets, and runs the TTC Test Sequence in one click.
+A reviewer sees the cube as coloured tiles and text, turns it by buttons and keys, reviews history, undoes, resets, and runs the TTC Test Sequence in one click, on a page that looks finished.
 **FRs covered:** FR8, FR9, FR10, FR11
 
-### Epic 4: Reviewer-ready delivery
+#### Story 3.6: UI polish (FR8 to FR11)
+
+As a reviewer,
+I want the cube page to look finished and be easy to scan,
+So that the cube and the TTC result are the first thing I see and I can tell what each control does.
+
+**Acceptance Criteria:**
+
+**Given** the cube page
+**When** I open it on a laptop screen
+**Then** the cube net is centred and is the main element, the controls and the history sit beside or above it without pushing it off the first screen, and the page has a page title, readable fonts and spacing (plain CSS, no new UI library)
+**And** on a phone-width screen the parts stack and nothing scrolls sideways.
+
+**Given** a session with moves
+**When** I look at the history
+**Then** it reads as one wrapping line of moves in order (for example `F R' U B' L D'`, one chip or span per move) instead of a tall numbered list
+**And** an empty session still says "No moves yet", and the history stays a list for assistive technology.
+
+**Given** the controls
+**When** I look at them
+**Then** the twelve move buttons are larger, grouped by face with clear spacing, and sit under a visible "Moves" label
+**And** Undo, Reset and "Apply TTC test sequence" are in a separate, labelled group, Reset is styled as the destructive action, and the TTC preset is visually the primary action.
+
+**Given** a button has keyboard focus or is hovered
+**When** I look at it
+**Then** it has one deliberate, consistent focus and hover style (no default browser leftovers).
+
+**Given** a change is in flight (move, undo, reset or the TTC sequence)
+**When** I look at the page
+**Then** the controls show a busy state (`aria-busy` and a visible cue) until the response arrives, so a second click being ignored is no longer silent
+**And** the first click is still the only one sent and focus is not lost (the 3.3 decision).
+
+**Given** the tiles and the exploded text view
+**When** I look at them
+**Then** light tiles (white, yellow) have a visible edge on the page background, each face has a visible label, and the text view has a larger monospace font under its heading so it can be compared with the PDF line by line.
+
+**Given** an error or the "changed by someone else" message
+**When** it is shown
+**Then** it is visually distinct from the content (for example a banner) and still has `role="alert"`.
+
+**Given** the change
+**When** I run `npm run lint`, `npm run test`, `npm run build` and `npm run e2e`
+**Then** everything passes: existing component tests are updated for the new markup, queries stay by role, and no cube logic or API shape changes.
+
+Out of scope: the WCAG 2.1 AA audit (contrast ratios, screen-reader status announcements, axe or Lighthouse pass, shortcut remapping) stays with Story 4.2; the 3D view is Story 5.1.
+
+## Epic 4: Reviewer-ready delivery
 README with exact prerequisites and expected output, architecture note, fresh-clone verification, GitHub publishing and cleanup.
 **FRs covered:** none (NFR5, NFR6, NFR7)
 
