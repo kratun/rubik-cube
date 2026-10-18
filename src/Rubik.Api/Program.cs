@@ -1,4 +1,5 @@
 using Rubik.Api.Errors;
+using Rubik.Api.OpenApi;
 using Rubik.Application.Cubes;
 using Rubik.Infrastructure.Cubes;
 
@@ -11,7 +12,12 @@ builder.Services.AddControllers()
         options.InvalidModelStateResponseFactory = context => context.HttpContext.RequestServices
             .GetRequiredService<ResultMapper>().ToBadRequest(context.HttpContext));
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SupportNonNullableReferenceTypes();
+    options.SchemaFilter<RequiredPropertiesSchemaFilter>();
+    options.OperationFilter<RequiredRequestBodyOperationFilter>();
+});
 builder.Services.AddHealthChecks();
 
 // Singleton: a shorter lifetime would lose every session (AD-5).
