@@ -21,6 +21,9 @@ import {
 } from "../fixtures/apiResponseFixture";
 import { MOVED_CUBE, MOVED_REVISION, SECOND_MOVED_REVISION } from "../fixtures/movedCubeFixture";
 import { SOLVED_CUBE, SOLVED_CUBE_ID } from "../fixtures/solvedCubeFixture";
+import { TTC_CUBE } from "../fixtures/ttcCubeFixture";
+import { TTC_TEST_SEQUENCE } from "../utils/ttcSequence";
+import type { CubeState } from "../../../services/types";
 import { cubePagePath } from "../utils/sessionUrl";
 import { CONFLICT_MESSAGE, CUBE_NOT_FOUND_MESSAGE, useCubeSession } from "./useCubeSession";
 
@@ -355,6 +358,141 @@ describe("useCubeSession", () => {
           status: "ready",
           cube: SOLVED_CUBE,
           notice: SERVER_ERROR_DETAIL,
+        });
+      });
+    });
+  });
+
+  describe("applyTtcSequence", () => {
+    it("shows the confirmed reset cube when the reload after a 409 on the sequence fails", async () => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(MOVED_CUBE));
+      const { result } = renderHook(() => useCubeSession(SOLVED_CUBE_ID));
+      await waitFor(() => {
+        expect(result.current.state.status).toBe("ready");
+      });
+      vi.mocked(globalThis.fetch)
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
+        .mockResolvedValueOnce(errorResponse(STATUS_CONFLICT, SERVER_ERROR_DETAIL))
+        .mockResolvedValueOnce(errorResponse(STATUS_SERVER_ERROR, NOT_FOUND_DETAIL));
+
+      act(() => {
+        result.current.applyTtcSequence();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({
+          status: "ready",
+          cube: SOLVED_CUBE,
+          notice: NOT_FOUND_DETAIL,
+        });
+      });
+    });
+
+    const RESET_URL = `${CUBES_PATH}/${SOLVED_CUBE_ID}/${RESET_SEGMENT}`;
+    const MOVES_URL = `${CUBES_PATH}/${SOLVED_CUBE_ID}/${MOVES_SEGMENT}`;
+
+    async function readySession(cube: CubeState) {
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(cube));
+      const view = renderHook(() => useCubeSession(SOLVED_CUBE_ID));
+      await waitFor(() => {
+        expect(view.result.current.state.status).toBe("ready");
+      });
+      return view;
+    }
+
+    it("resets a cube with moves, then applies the sequence on the revision the reset answered", async () => {
+      const { result } = await readySession(MOVED_CUBE);
+      const fetchMock = vi.mocked(globalThis.fetch);
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
+        .mockResolvedValueOnce(jsonResponse(TTC_CUBE));
+
+      act(() => {
+        result.current.applyTtcSequence();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({ status: "ready", cube: TTC_CUBE, notice: null });
+      });
+      expect(fetchMock).toHaveBeenNthCalledWith(2, RESET_URL, expect.anything());
+      expect(requestBodyOf(fetchMock.mock.calls[1])).toEqual({ expectedRevision: MOVED_REVISION });
+      expect(fetchMock).toHaveBeenNthCalledWith(3, MOVES_URL, expect.anything());
+      expect(requestBodyOf(fetchMock.mock.calls[2])).toEqual({
+        expectedRevision: SOLVED_CUBE.revision,
+        moves: TTC_TEST_SEQUENCE,
+      });
+    });
+
+    it("skips the reset for a cube without moves", async () => {
+      const { result } = await readySession(SOLVED_CUBE);
+      const fetchMock = vi.mocked(globalThis.fetch);
+      fetchMock.mockResolvedValueOnce(jsonResponse(TTC_CUBE));
+
+      act(() => {
+        result.current.applyTtcSequence();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({ status: "ready", cube: TTC_CUBE, notice: null });
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(fetchMock).toHaveBeenLastCalledWith(MOVES_URL, expect.anything());
+    });
+
+    it("shows the confirmed reset cube with the message when the sequence fails after the reset", async () => {
+      const { result } = await readySession(MOVED_CUBE);
+      vi.mocked(globalThis.fetch)
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
+        .mockResolvedValueOnce(errorResponse(STATUS_SERVER_ERROR, SERVER_ERROR_DETAIL));
+
+      act(() => {
+        result.current.applyTtcSequence();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({
+          status: "ready",
+          cube: SOLVED_CUBE,
+          notice: SERVER_ERROR_DETAIL,
+        });
+      });
+    });
+
+    it("keeps the old cube when the reset fails", async () => {
+      const { result } = await readySession(MOVED_CUBE);
+      const fetchMock = vi.mocked(globalThis.fetch);
+      fetchMock.mockResolvedValueOnce(errorResponse(STATUS_SERVER_ERROR, SERVER_ERROR_DETAIL));
+
+      act(() => {
+        result.current.applyTtcSequence();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({
+          status: "ready",
+          cube: MOVED_CUBE,
+          notice: SERVER_ERROR_DETAIL,
+        });
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it("reloads the session when the sequence answers 409 after the reset", async () => {
+      const { result } = await readySession(MOVED_CUBE);
+      vi.mocked(globalThis.fetch)
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
+        .mockResolvedValueOnce(errorResponse(STATUS_CONFLICT, SERVER_ERROR_DETAIL))
+        .mockResolvedValueOnce(jsonResponse(MOVED_CUBE));
+
+      act(() => {
+        result.current.applyTtcSequence();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({
+          status: "ready",
+          cube: MOVED_CUBE,
+          notice: CONFLICT_MESSAGE,
         });
       });
     });

@@ -3,6 +3,7 @@ import type { ApiResult } from "../../../services/types/apiResult";
 import { applyMoves, createCube, getCube, resetCube, undoMove } from "../../../services/client";
 import type { CubeState } from "../../../services/types";
 import { cubePagePath } from "../utils/sessionUrl";
+import { TTC_TEST_SEQUENCE } from "../utils/ttcSequence";
 
 export const CUBE_NOT_FOUND_MESSAGE = "Cube not found";
 export const CONFLICT_MESSAGE = "The cube was changed by someone else";
@@ -54,9 +55,38 @@ export interface CubeSession {
   applyMove: (token: string) => void;
   undo: () => void;
   reset: () => void;
+  applyTtcSequence: () => void;
 }
 
-type SendMutation = (cubeId: string, expectedRevision: string) => Promise<ApiResult<CubeState>>;
+/**
+ * What a change answered. `confirmed` is set when an earlier step of a two-request change already
+ * succeeded, so a later failure still leaves a state the server confirmed to show.
+ */
+interface MutationOutcome {
+  result: ApiResult<CubeState>;
+  confirmed: CubeState | null;
+}
+
+type SendMutation = (cube: CubeState) => Promise<MutationOutcome>;
+
+function singleRequest(result: ApiResult<CubeState>): MutationOutcome {
+  return { result, confirmed: null };
+}
+
+// Reset, then the sequence on the revision the reset answered. The two requests are not atomic: if the
+// second fails, the server is already at the Solved State, so that state is the one to show.
+async function resetThenApplyTtc(cube: CubeState): Promise<MutationOutcome> {
+  let current = cube;
+  if (cube.moves.length > 0) {
+    const reset = await resetCube(cube.cubeId, cube.revision);
+    if (!reset.ok) {
+      return singleRequest(reset);
+    }
+    current = reset.data;
+  }
+  const applied = await applyMoves(current.cubeId, current.revision, [...TTC_TEST_SEQUENCE]);
+  return { result: applied, confirmed: current === cube ? null : current };
+}
 
 /**
  * The session of the cube in the URL (AD-9): loads `cubeId`, or creates a cube when there is none,
@@ -105,19 +135,24 @@ export function useCubeSession(cubeId: string | null): CubeSession {
       if (state.status !== "ready" || moveInFlight.current) {
         return;
       }
-      const { cubeId: id, revision } = state.cube;
+      const id = state.cube.cubeId;
       moveInFlight.current = true;
-      void send(id, revision).then(async (result) => {
+      void send(state.cube).then(async ({ result, confirmed }) => {
         if (result.ok) {
           dispatch({ type: "loaded", cube: result.data, notice: null });
         } else if (result.status === HTTP_CONFLICT) {
           // The server is the source of truth: take its state and do not apply the action.
           const reloaded = await getCube(id);
-          dispatch(
-            reloaded.ok
-              ? { type: "loaded", cube: reloaded.data, notice: CONFLICT_MESSAGE }
-              : { type: "moveFailed", message: reloaded.error.detail },
-          );
+          if (reloaded.ok) {
+            dispatch({ type: "loaded", cube: reloaded.data, notice: CONFLICT_MESSAGE });
+          } else if (confirmed !== null) {
+            // The reset already worked, so the server is at the state it confirmed, not the old cube.
+            dispatch({ type: "loaded", cube: confirmed, notice: reloaded.error.detail });
+          } else {
+            dispatch({ type: "moveFailed", message: reloaded.error.detail });
+          }
+        } else if (confirmed !== null) {
+          dispatch({ type: "loaded", cube: confirmed, notice: result.error.detail });
         } else {
           dispatch({ type: "moveFailed", message: result.error.detail });
         }
@@ -128,16 +163,19 @@ export function useCubeSession(cubeId: string | null): CubeSession {
 
   const applyMove = useCallback(
     (token: string) => {
-      mutate((id, revision) => applyMoves(id, revision, [token]));
+      mutate(async (cube) => singleRequest(await applyMoves(cube.cubeId, cube.revision, [token])));
     },
     [mutate],
   );
   const undo = useCallback(() => {
-    mutate(undoMove);
+    mutate(async (cube) => singleRequest(await undoMove(cube.cubeId, cube.revision)));
   }, [mutate]);
   const reset = useCallback(() => {
-    mutate(resetCube);
+    mutate(async (cube) => singleRequest(await resetCube(cube.cubeId, cube.revision)));
+  }, [mutate]);
+  const applyTtcSequence = useCallback(() => {
+    mutate(resetThenApplyTtc);
   }, [mutate]);
 
-  return { state, startNewCube, applyMove, undo, reset };
+  return { state, startNewCube, applyMove, undo, reset, applyTtcSequence };
 }
