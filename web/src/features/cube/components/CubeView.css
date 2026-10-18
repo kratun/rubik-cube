@@ -1,20 +1,40 @@
 /* Colour names come from the API; this file only paints them. */
 .cube-net {
+  grid-area: view;
+  justify-self: center;
+  align-self: start;
+  --tile-size: clamp(1rem, 6vw, 2.75rem);
+  --tile-gap: 2px;
   display: grid;
   grid-template-areas:
     ". up . ."
     "left front right back"
     ". down . .";
   grid-template-columns: repeat(4, max-content);
-  gap: 0.5rem;
-  margin-block: 1rem;
+  gap: clamp(0.25rem, 1.5vw, 0.75rem);
+  padding: clamp(0.5rem, 2vw, 1.25rem);
+  border-radius: 0.75rem;
+  background: var(--colour-board);
 }
 
 .face {
   display: grid;
-  grid-template-columns: repeat(3, 2.5rem);
-  grid-auto-rows: 2.5rem;
-  gap: 2px;
+  justify-items: center;
+  gap: 0.25rem;
+}
+
+.face-label {
+  color: var(--colour-on-board);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+}
+
+.face-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, var(--tile-size));
+  grid-auto-rows: var(--tile-size);
+  gap: var(--tile-gap);
 }
 
 .face-up {
@@ -42,8 +62,14 @@
 }
 
 .tile {
-  border: 1px solid #222;
-  border-radius: 3px;
+  border: 2px solid var(--colour-tile-edge);
+  border-radius: 4px;
+}
+
+/* A light ring on the light tiles keeps their edge visible on any background. */
+.tile[data-colour="White"],
+.tile[data-colour="Yellow"] {
+  box-shadow: 0 0 0 1px var(--colour-light-tile-ring);
 }
 
 .tile[data-colour="White"] {

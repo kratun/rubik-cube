@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { AlertBanner } from "../features/cube/components/AlertBanner";
 
 export const ERROR_FALLBACK_MESSAGE = "Something went wrong. Reload the page to try again.";
 
@@ -23,6 +24,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   render(): ReactNode {
-    return this.state.hasError ? <p role="alert">{ERROR_FALLBACK_MESSAGE}</p> : this.props.children;
+    return this.state.hasError ? (
+      <AlertBanner message={ERROR_FALLBACK_MESSAGE} />
+    ) : (
+      this.props.children
+    );
   }
 }

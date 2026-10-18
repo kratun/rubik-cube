@@ -1,14 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
-import { CubeView, EXPLODED_VIEW_HEADING, FACE_NAMES, faceLabel } from "./CubeView";
-import {
-  SOLVED_CUBE,
-  SOLVED_EXPLODED_VIEW,
-  SOLVED_FACE_COLOURS,
-} from "../fixtures/solvedCubeFixture";
+import { CubeView, FACE_NAMES, faceLabel } from "./CubeView";
+import { SOLVED_CUBE, SOLVED_FACE_COLOURS } from "../fixtures/solvedCubeFixture";
 
 const TILES_PER_FACE = 9;
 const FACE_COUNT = 6;
-const LINE_BREAK = "\n";
 
 describe("CubeView", () => {
   it("shows six faces of nine tiles each", () => {
@@ -30,10 +25,13 @@ describe("CubeView", () => {
     }
   });
 
-  it("shows the exploded view lines unchanged", () => {
+  it("shows a visible caption for every face", () => {
     render(<CubeView cube={SOLVED_CUBE} />);
 
-    const view = screen.getByRole("region", { name: EXPLODED_VIEW_HEADING });
-    expect(view.querySelector("pre")?.textContent).toBe(SOLVED_EXPLODED_VIEW.join(LINE_BREAK));
+    for (const face of FACE_NAMES) {
+      expect(
+        within(screen.getByRole("group", { name: faceLabel(face) })).getByText(face),
+      ).toBeInTheDocument();
+    }
   });
 });

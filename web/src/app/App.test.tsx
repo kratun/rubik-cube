@@ -29,7 +29,7 @@ describe("App", () => {
   });
 
   it("keeps the title and shows the fallback when the page crashes", async () => {
-    const brokenCube = { ...SOLVED_CUBE, explodedView: undefined };
+    const brokenCube = { ...SOLVED_CUBE, faces: undefined };
     vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(brokenCube));
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 

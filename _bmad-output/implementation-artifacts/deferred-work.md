@@ -35,3 +35,7 @@
 - source_spec: none
   summary: Idea from the owner (2026-10-18), not decided: add a textarea with an Apply button for typing a move sequence, and let the "Apply TTC test sequence" button put the TTC text into that textarea for testing.
   evidence: Open choices: its own story (3.7) or part of 3.6; whether Apply appends to the current cube or resets first; whether the TTC button only fills the text or also applies it. Taking it changes the Story 3.5 acceptance criterion ("one click") and the e2e flow (an extra click). The API already validates tokens (400), so the frontend would only split the text on whitespace.
+
+## Deferred from: code review of spec-3-6-ui-polish-fr8-to-fr11 (2026-10-18)
+
+- Add to the WCAG 2.1 AA pass (Story 4.2): the busy cue "Working…" is a plain span, so a screen reader is not told when a change starts or ends (4.1.3); `aria-busy` dims the group to opacity 0.7, so the contrast of text and focus ring while busy needs measuring (1.4.3, 1.4.11).

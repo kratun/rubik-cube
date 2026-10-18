@@ -9,6 +9,7 @@ const MODIFIERS = ["Control", "Alt", "Meta"];
 const NOT_MOVE_KEY = "x";
 const FIELD_LABEL = "Notes";
 const BUTTON_LABEL = "Focus";
+const DIALOG_BUTTON_LABEL = "Close";
 
 function withModifier(modifier: string, key: string): string {
   return `{${modifier}>}${key}{/${modifier}}`;
@@ -85,6 +86,24 @@ describe("useMoveKeys", () => {
   it("removes the listener on unmount", async () => {
     const { onMove, unmount } = renderKeys();
     unmount();
+
+    await userEvent.keyboard(CLOCKWISE_KEY);
+
+    expect(onMove).not.toHaveBeenCalled();
+  });
+
+  it("ignores keys pressed inside a modal dialog", async () => {
+    const onMove = vi.fn();
+    function Page() {
+      useMoveKeys(onMove);
+      return (
+        <div role="dialog" aria-modal="true" aria-label="Dialog">
+          <button type="button">{DIALOG_BUTTON_LABEL}</button>
+        </div>
+      );
+    }
+    render(<Page />);
+    screen.getByRole("button", { name: DIALOG_BUTTON_LABEL }).focus();
 
     await userEvent.keyboard(CLOCKWISE_KEY);
 

@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { AlertBanner } from "./components/AlertBanner";
 import { CubeView } from "./components/CubeView";
+import { ExplodedView } from "./components/ExplodedView";
 import { MoveHistory } from "./components/MoveHistory";
 import { MovePad } from "./components/MovePad";
 import { SessionControls } from "./components/SessionControls";
 import { cubeIdFromPath } from "./utils/sessionUrl";
 import { useCubeSession } from "./hooks/useCubeSession";
 import { useMoveKeys } from "./hooks/useMoveKeys";
+import "./CubePage.css";
 
 export const LOADING_MESSAGE = "Loading the cube…";
 export const START_NEW_CUBE_LABEL = "Start a new cube";
@@ -13,8 +16,16 @@ export const START_NEW_CUBE_LABEL = "Start a new cube";
 export function CubePage() {
   // The URL is read once: the hook itself moves it to the cube it shows.
   const [cubeId] = useState(() => cubeIdFromPath(window.location.pathname));
-  const { state, startNewCube, applyMove, undo, reset, applyTtcSequence } = useCubeSession(cubeId);
+  const { state, busy, startNewCube, applyMove, undo, reset, applyTtcSequence } =
+    useCubeSession(cubeId);
   useMoveKeys(applyMove);
+  const [explodedViewOpen, setExplodedViewOpen] = useState(false);
+  const openExplodedView = useCallback(() => {
+    setExplodedViewOpen(true);
+  }, []);
+  const closeExplodedView = useCallback(() => {
+    setExplodedViewOpen(false);
+  }, []);
 
   switch (state.status) {
     case "loading":
@@ -22,7 +33,7 @@ export function CubePage() {
     case "error":
       return (
         <>
-          <p role="alert">{state.message}</p>
+          <AlertBanner message={state.message} />
           <button type="button" onClick={startNewCube}>
             {START_NEW_CUBE_LABEL}
           </button>
@@ -31,16 +42,27 @@ export function CubePage() {
     case "ready":
       return (
         <>
-          {state.notice !== null && <p role="alert">{state.notice}</p>}
-          <MovePad onMove={applyMove} />
-          <SessionControls
-            canUndo={state.cube.moves.length > 0}
-            onUndo={undo}
-            onReset={reset}
-            onApplyTtc={applyTtcSequence}
+          {state.notice !== null && <AlertBanner message={state.notice} />}
+          <div className="cube-page">
+            <CubeView cube={state.cube} />
+            <div className="cube-page-side">
+              <SessionControls
+                canUndo={state.cube.moves.length > 0}
+                busy={busy}
+                onUndo={undo}
+                onReset={reset}
+                onApplyTtc={applyTtcSequence}
+                onShowExplodedView={openExplodedView}
+              />
+              <MovePad onMove={applyMove} busy={busy} />
+              <MoveHistory moves={state.cube.moves} />
+            </div>
+          </div>
+          <ExplodedView
+            lines={state.cube.explodedView}
+            open={explodedViewOpen}
+            onClose={closeExplodedView}
           />
-          <MoveHistory moves={state.cube.moves} />
-          <CubeView cube={state.cube} />
         </>
       );
   }
