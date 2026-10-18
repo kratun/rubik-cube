@@ -2,7 +2,7 @@
 title: 'Story 3.1: Frontend scaffold with generated API types and a typed client'
 type: 'feature'
 created: '2026-10-18'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 review_loop_iteration: 0
 context: []
