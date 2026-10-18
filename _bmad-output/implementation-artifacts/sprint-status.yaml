@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 10-17-2026 12:00
-last_updated: 10-18-2026 00:59
+last_updated: 10-18-2026 12:30
 project: rubik-cube
 project_key: NOKEY
 tracking_system: file-system
@@ -57,7 +57,7 @@ development_status:
   3-4-move-history-undo-and-reset-fr11: done
   3-5-ttc-test-sequence-in-one-click-and-the-end-to-end-check-fr10: done
   3-6-ui-polish-fr8-to-fr11: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
 
   # FINAL epic: runs last, after Epics 1-3. Suggested order: 4-2 -> 4-3 -> 4-1 (4-1 clones from GitHub, so publish first).
   epic-4: backlog
@@ -133,3 +133,54 @@ action_items:
     owner: "Drago"
     status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-2026-10-18.md"
+  - id: "epic-3-retro-item-9-at-story-4-2-make-npm-run-lint-pass-on-a"
+    epic: 3
+    action: "At Story 4.2 make npm run lint pass on a CRLF Windows checkout (for example
+      endOfLine auto in web/.prettierrc.json)"
+    owner: "Drago"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-18.md"
+  - id: "epic-3-retro-item-10-at-story-4-2-merge-the-two-wcag-entries"
+    epic: 3
+    action: "At Story 4.2 merge the two WCAG entries in deferred-work.md and run the
+      audit (busy cue live region, contrast while busy, 2.1.4 shortcuts, exploded-view
+      dialog focus)"
+    owner: "Drago"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-18.md"
+  - id: "epic-3-retro-item-11-before-story-4-2-decide-the-textarea-wit"
+    epic: 3
+    action: "Before Story 4.2 decide the textarea-with-Apply idea (Story 3.7, part
+      of 4.2, or drop) and update deferred-work.md"
+    owner: "Drago"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-18.md"
+  - id: "epic-3-retro-item-12-run-dotnet-test-on-your-own-terminal-and"
+    epic: 3
+    action: "Run dotnet test on your own terminal and confirm tests are discovered
+      (it showed Zero tests ran in the retro environment); fix the runner configuration
+      before Story 4.1 if not"
+    owner: "Drago"
+    status: done
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-18.md"
+  - id: "epic-3-retro-item-13-at-story-4-2-decide-whether-cubepage-tes"
+    epic: 3
+    action: "At Story 4.2 decide whether CubePage.test.tsx and useCubeSession.test.ts
+      are unwieldy and, if so, move shared set-up helpers into a shared test file"
+    owner: "Drago"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-18.md"
+  - id: "epic-3-retro-item-14-for-ui-stories-show-screenshots-at-lapto"
+    epic: 3
+    action: "For UI stories show screenshots at laptop and phone width before code
+      review, and open a story when the same finding is rejected in two reviews running"
+    owner: "Drago"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-18.md"
+  - id: "epic-3-retro-item-15-clarify-in-claude-md-whether-no-magic-va"
+    epic: 3
+    action: "Clarify in CLAUDE.md whether no magic values covers CSS (proposal: custom
+      properties for colours and fonts, media-query breakpoints exempt)"
+    owner: "Drago"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-2026-10-18.md"
