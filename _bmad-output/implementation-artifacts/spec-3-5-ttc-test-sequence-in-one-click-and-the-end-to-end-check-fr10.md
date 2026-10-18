@@ -2,7 +2,7 @@
 title: 'Story 3.5: TTC Test Sequence in one click and the end-to-end check (FR10, NFR3)'
 type: 'feature'
 created: '2026-10-18'
-status: 'in-review'
+status: 'done'
 baseline_commit: 'd29e016deb6b1246097ba278606508b3834edd55'
 route: 'dispatch'
 review_loop_iteration: 0
