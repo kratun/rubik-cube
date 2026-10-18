@@ -618,7 +618,7 @@ So that it looks like production-quality work.
 **When** I prepare the submission
 **Then** the owner decides which to keep, and `.gitignore` and the final tree reflect that decision.
 
-### Story 4.2b: WCAG 2.1 AA audit (NFR5)
+### Story 4.2b: WCAG 2.1 AA audit
 
 As a reviewer,
 I want the UI checked against WCAG 2.1 Level AA,

@@ -34,6 +34,7 @@ import {
   TTC_LABEL,
   UNDO_LABEL,
 } from "./components/SessionControls";
+import { SHORTCUTS_LABEL } from "./components/ShortcutsToggle";
 import { MOVED_CUBE } from "./fixtures/movedCubeFixture";
 import { TTC_CUBE, TTC_EXPLODED_VIEW, TTC_HISTORY } from "./fixtures/ttcCubeFixture";
 import { MOVE_TOKENS } from "./utils/moves";
@@ -195,6 +196,34 @@ describe("CubePage", () => {
       expect(requestBodyOf(moveCalls(fetchMock)[0])).toEqual({
         expectedRevision: SOLVED_CUBE.revision,
         moves: [MOVE_BUTTON],
+      });
+    });
+
+    it("starts with the keyboard shortcuts switched on", async () => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(SOLVED_CUBE));
+      await showSolvedCube();
+
+      expect(screen.getByRole("checkbox", { name: SHORTCUTS_LABEL })).toBeChecked();
+    });
+
+    it("sends no move for a letter key while the keyboard shortcuts are switched off, and again once they are on", async () => {
+      const fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
+        .mockResolvedValueOnce(jsonResponse(MOVED_CUBE));
+      await showSolvedCube();
+      const toggle = screen.getByRole("checkbox", { name: SHORTCUTS_LABEL });
+
+      await userEvent.click(toggle);
+      await userEvent.keyboard(CLOCKWISE_KEY);
+
+      expect(moveCalls(fetchMock)).toHaveLength(0);
+
+      await userEvent.click(toggle);
+      await userEvent.keyboard(CLOCKWISE_KEY);
+
+      await waitFor(() => {
+        expect(moveCalls(fetchMock)).toHaveLength(1);
       });
     });
 

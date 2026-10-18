@@ -1,0 +1,26 @@
+.shortcuts-toggle {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.shortcuts-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+}
+
+.shortcuts-toggle input {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--colour-accent);
+}
+
+.shortcuts-toggle input:focus-visible {
+  outline: 3px solid var(--colour-focus);
+  outline-offset: 2px;
+}
+
+.shortcuts-hint {
+  color: var(--colour-muted);
+}

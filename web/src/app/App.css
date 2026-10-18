@@ -5,7 +5,7 @@
   --colour-text: #1b1f27;
   --colour-muted: #4b5262;
   --colour-border: #c3c9d4;
-  --colour-border-strong: #8b93a3;
+  --colour-border-strong: #7d8596;
   --colour-chip: #e9ecf2;
   --colour-backdrop: rgb(15 18 25 / 65%);
   --colour-accent: #1d4ed8;
@@ -99,9 +99,9 @@ button:disabled {
   opacity: 0.5;
 }
 
-/* A running change: the controls are dimmed and show a progress cursor, but stay enabled. */
+/* A running change: slightly dimmed (0.85 keeps muted text above 4.5:1 and the focus ring above 3:1) with a progress cursor; controls stay enabled. */
 [aria-busy="true"] {
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
 [aria-busy="true"] button {
@@ -117,4 +117,17 @@ button:disabled {
   background: var(--colour-danger-soft);
   color: var(--colour-danger);
   font-weight: 600;
+}
+
+/* Read by screen readers only (live regions); the same text is not repeated visually. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }

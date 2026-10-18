@@ -48,29 +48,33 @@ export function SessionControls({
   }, [canUndo]);
 
   return (
-    <div
-      role="group"
-      aria-labelledby={SESSION_CONTROLS_LABEL_ID}
-      aria-busy={busy}
-      className="session-controls"
-    >
-      <h2 id={SESSION_CONTROLS_LABEL_ID} className="group-label">
-        {SESSION_CONTROLS_LABEL}
-      </h2>
-      <button ref={undoButton} type="button" disabled={!canUndo} onClick={onUndo}>
-        {UNDO_LABEL}
-      </button>
-      <button ref={resetButton} type="button" className="button-danger" onClick={onReset}>
-        {RESET_LABEL}
-      </button>
-      <button type="button" className="exploded-view-opener" onClick={onShowExplodedView}>
-        {SHOW_EXPLODED_VIEW_LABEL}
-      </button>
-      <button type="button" className="button-primary" onClick={onApplyTtc}>
-        {TTC_LABEL}
-      </button>
-      {/* Always rendered so the row keeps its height and nothing jumps when a change starts. */}
-      <span className="busy-cue">{busy && BUSY_LABEL}</span>
-    </div>
+    <>
+      <div
+        role="group"
+        aria-labelledby={SESSION_CONTROLS_LABEL_ID}
+        aria-busy={busy}
+        className="session-controls"
+      >
+        <h2 id={SESSION_CONTROLS_LABEL_ID} className="group-label">
+          {SESSION_CONTROLS_LABEL}
+        </h2>
+        <button ref={undoButton} type="button" disabled={!canUndo} onClick={onUndo}>
+          {UNDO_LABEL}
+        </button>
+        <button ref={resetButton} type="button" className="button-danger" onClick={onReset}>
+          {RESET_LABEL}
+        </button>
+        <button type="button" className="exploded-view-opener" onClick={onShowExplodedView}>
+          {SHOW_EXPLODED_VIEW_LABEL}
+        </button>
+        <button type="button" className="button-primary" onClick={onApplyTtc}>
+          {TTC_LABEL}
+        </button>
+      </div>
+      {/* Outside the aria-busy group, which would hold back announcements inside it; always rendered so the row keeps its height (4.1.3). */}
+      <span role="status" className="busy-cue">
+        {busy && BUSY_LABEL}
+      </span>
+    </>
   );
 }
