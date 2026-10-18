@@ -2,7 +2,7 @@
 title: 'Story 3.4: Move history, undo and reset (FR11)'
 type: 'feature'
 created: '2026-10-18'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 baseline_commit: '3e234ae'
 review_loop_iteration: 0
