@@ -5,6 +5,8 @@ import {
   HTTP_POST,
   MOVES_SEGMENT,
   NETWORK_ERROR_MESSAGE,
+  RESET_SEGMENT,
+  UNDO_SEGMENT,
 } from "../../api/client";
 import {
   NOT_FOUND_DETAIL,
@@ -20,7 +22,7 @@ import {
 import { MOVED_CUBE, MOVED_REVISION, SECOND_MOVED_REVISION } from "./movedCubeFixture";
 import { SOLVED_CUBE, SOLVED_CUBE_ID } from "./solvedCubeFixture";
 import { cubePagePath } from "./sessionUrl";
-import { CUBE_NOT_FOUND_MESSAGE, useCubeSession } from "./useCubeSession";
+import { CONFLICT_MESSAGE, CUBE_NOT_FOUND_MESSAGE, useCubeSession } from "./useCubeSession";
 
 const UNKNOWN_ID = "unknown";
 const ROOT = "/";
@@ -140,6 +142,118 @@ describe("useCubeSession", () => {
       expect(result.current.state).toEqual({ status: "ready", cube: SOLVED_CUBE, notice: null });
     });
     expect(window.location.pathname).toBe(cubePagePath(SOLVED_CUBE_ID));
+  });
+
+  describe.each([
+    { name: "undo", segment: UNDO_SEGMENT },
+    { name: "reset", segment: RESET_SEGMENT },
+  ] as const)("$name", ({ name, segment }) => {
+    const URL = `${CUBES_PATH}/${SOLVED_CUBE_ID}/${segment}`;
+
+    async function readyMovedSession() {
+      const view = renderHook(() => useCubeSession(SOLVED_CUBE_ID));
+      await waitFor(() => {
+        expect(view.result.current.state.status).toBe("ready");
+      });
+      return view;
+    }
+
+    it("posts the current revision and shows the response", async () => {
+      const fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
+      const { result } = await readyMovedSession();
+
+      act(() => {
+        result.current[name]();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({ status: "ready", cube: SOLVED_CUBE, notice: null });
+      });
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        URL,
+        expect.objectContaining({ method: HTTP_POST }),
+      );
+      expect(requestBodyOf(fetchMock.mock.calls[1])).toEqual({
+        expectedRevision: MOVED_REVISION,
+      });
+    });
+
+    it("keeps the cube and shows the message when it fails", async () => {
+      vi.spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
+        .mockResolvedValueOnce(errorResponse(STATUS_SERVER_ERROR, SERVER_ERROR_DETAIL));
+      const { result } = await readyMovedSession();
+
+      act(() => {
+        result.current[name]();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({
+          status: "ready",
+          cube: MOVED_CUBE,
+          notice: SERVER_ERROR_DETAIL,
+        });
+      });
+    });
+
+    it("reloads the session on a 409 and reports the conflict", async () => {
+      vi.spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
+        .mockResolvedValueOnce(errorResponse(STATUS_CONFLICT, SERVER_ERROR_DETAIL))
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
+      const { result } = await readyMovedSession();
+
+      act(() => {
+        result.current[name]();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({
+          status: "ready",
+          cube: SOLVED_CUBE,
+          notice: CONFLICT_MESSAGE,
+        });
+      });
+    });
+
+    it("keeps the cube and shows the reload error when the reload after a 409 fails", async () => {
+      vi.spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
+        .mockResolvedValueOnce(errorResponse(STATUS_CONFLICT, SERVER_ERROR_DETAIL))
+        .mockResolvedValueOnce(errorResponse(STATUS_SERVER_ERROR, NOT_FOUND_DETAIL));
+      const { result } = await readyMovedSession();
+
+      act(() => {
+        result.current[name]();
+      });
+
+      await waitFor(() => {
+        expect(result.current.state).toEqual({
+          status: "ready",
+          cube: MOVED_CUBE,
+          notice: NOT_FOUND_DETAIL,
+        });
+      });
+    });
+
+    it("is ignored while another change is in flight", async () => {
+      const fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
+        .mockReturnValueOnce(new Promise(() => undefined));
+      const { result } = await readyMovedSession();
+
+      act(() => {
+        result.current.applyMove("F");
+        result.current[name]();
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe("applyMove", () => {
