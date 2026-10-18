@@ -2,7 +2,7 @@
 title: 'Story 4.3: Publish to GitHub'
 type: 'chore'
 created: '2026-10-19'
-status: 'in-progress'
+status: 'done'
 route: 'oneshot'
 review_loop_iteration: 0
 baseline_commit: 'a1c01f97a075cfe53b78fe0876b02597a00421f1'
@@ -34,6 +34,8 @@ Exception (CLAUDE.md "never silent"): the Problem asks for no personal data, and
 Changes: `README.md` (prerequisite line for `dotnet tool restore`), `CLAUDE.md` (same on the CSharpier line), `.gitignore` (`*.bak`), `web/.gitignore` (`.vitest/`; `playwright-report/` was already there), `deferred-work.md` (entry deleted), `sprint-status.yaml` (`in-progress`). No code, API or generated type changes.
 
 Repository state on 2026-10-19 (owner, read in the GitHub UI): public, default branch `main`, description set (same as the README's second line), website empty, topics none (owner decision). The remote still holds about 40 old feature and chore branches; they stay (owner decision).
+
+Post-publish check (2026-10-19, read only): PR #42 merged; local `main` and `origin/main` are both `579d5e2`; `git ls-remote --symref origin HEAD` shows the default branch `main`; `README.md` is at the root of `origin/main`; description, public visibility and no topics were confirmed by the owner in the GitHub UI; the secrets and personal-data scan (above) covers the merged tree, since 72e5fa8 only adds documentation and ignore rules. Not run before the merge: `dotnet build`/`test` (blocked by a stale `Rubik.Api` process) and the npm checks; the change touches no code.
 
 ## Review Triage Log
 
