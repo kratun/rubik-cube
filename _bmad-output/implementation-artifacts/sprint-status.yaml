@@ -64,7 +64,7 @@ development_status:
   4-1-readme-verified-in-a-fresh-clone-nfr7: backlog
   4-2-quality-pass-and-cleanup-nfr3-nfr5: done
   4-2b-wcag-2-1-aa-audit: done
-  4-3-publish-to-github-nfr6: backlog
+  4-3-publish-to-github-nfr6: in-progress
   epic-4-retrospective: optional
 
   # OPTIONAL epic (3D orbit, Docker, CI): start only if Epics 1-4 are done; cut first if time runs out.
