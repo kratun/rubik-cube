@@ -35,7 +35,15 @@ export default tseslint.config(
   { files: ["*.config.{js,ts}"], languageOptions: { globals: globals.node } },
   restrict(productionFiles),
   restrict(["src/features/*/utils/**"], {
-    group: ["react", "react-dom", "react/*", "**/hooks/**", "**/components/**", "**/services/**"],
+    group: [
+      "react",
+      "react-dom",
+      "react/*",
+      "react-dom/*",
+      "**/hooks/**",
+      "**/components/**",
+      "**/services/**",
+    ],
     message: "utils/ holds plain functions: no React, hooks, components or server access.",
   }),
   restrict(["src/features/*/hooks/**"], {
@@ -43,8 +51,9 @@ export default tseslint.config(
     message: "hooks/ must not depend on components/.",
   }),
   restrict(["src/features/*/components/**"], {
-    group: ["**/services/client"],
-    message: "components/ reach the server only through hooks/ (AD-9).",
+    group: ["**/services/**", "!**/services/types", "!**/services/types/**"],
+    message:
+      "components/ reach the server only through hooks/ (AD-9); only services/types is allowed.",
   }),
   prettier,
 );
