@@ -18,9 +18,9 @@ import {
   errorResponse,
   jsonResponse,
   requestBodyOf,
-} from "../testing/apiResponseFixture";
-import { MOVED_CUBE, MOVED_REVISION, SECOND_MOVED_REVISION } from "../testing/movedCubeFixture";
-import { SOLVED_CUBE, SOLVED_CUBE_ID } from "../testing/solvedCubeFixture";
+} from "../fixtures/apiResponseFixture";
+import { MOVED_CUBE, MOVED_REVISION, SECOND_MOVED_REVISION } from "../fixtures/movedCubeFixture";
+import { SOLVED_CUBE, SOLVED_CUBE_ID } from "../fixtures/solvedCubeFixture";
 import { cubePagePath } from "../utils/sessionUrl";
 import { CONFLICT_MESSAGE, CUBE_NOT_FOUND_MESSAGE, useCubeSession } from "./useCubeSession";
 

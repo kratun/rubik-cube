@@ -20,16 +20,16 @@ import {
   errorResponse,
   jsonResponse,
   requestBodyOf,
-} from "./testing/apiResponseFixture";
+} from "./fixtures/apiResponseFixture";
 import { CubePage, START_NEW_CUBE_LABEL } from "./CubePage";
 import { EXPLODED_VIEW_HEADING, FACE_NAMES, faceLabel } from "./components/CubeView";
 import { NO_MOVES_MESSAGE } from "./components/MoveHistory";
 import { MOVE_PAD_LABEL } from "./components/MovePad";
 import { RESET_LABEL, UNDO_LABEL } from "./components/SessionControls";
-import { MOVED_CUBE } from "./testing/movedCubeFixture";
+import { MOVED_CUBE } from "./fixtures/movedCubeFixture";
 import { MOVE_TOKENS } from "./utils/moves";
 import { cubePagePath } from "./utils/sessionUrl";
-import { SOLVED_CUBE, SOLVED_CUBE_ID, SOLVED_EXPLODED_VIEW } from "./testing/solvedCubeFixture";
+import { SOLVED_CUBE, SOLVED_CUBE_ID, SOLVED_EXPLODED_VIEW } from "./fixtures/solvedCubeFixture";
 import { CONFLICT_MESSAGE, CUBE_NOT_FOUND_MESSAGE } from "./hooks/useCubeSession";
 
 const ROOT = "/";

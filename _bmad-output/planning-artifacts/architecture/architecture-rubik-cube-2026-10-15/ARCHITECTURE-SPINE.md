@@ -167,7 +167,7 @@ rubik-cube/
     Rubik.Domain.Tests/  Rubik.Application.Tests/  Rubik.Infrastructure.Tests/  Rubik.Api.Tests/
   web/
     src/services/ (client.ts, types/: generated/, apiResult.ts, index.ts)  src/app/
-    src/features/cube/ (CubePage.tsx, components/, hooks/, utils/, testing/)
+    src/features/cube/ (CubePage.tsx, components/, hooks/, utils/, fixtures/)
     e2e/ (one Playwright flow)  vite.config.ts  nginx.conf  Dockerfile
   README.md  CLAUDE.md
 ```
@@ -175,7 +175,7 @@ rubik-cube/
 Frontend layout rules (checked by ESLint `no-restricted-imports`; tests sit beside their file):
 
 - `services/` is the only code that talks to the server; `services/types/` holds the generated OpenAPI types, the hand-written `ApiResult<T>` and the aliases.
-- In a feature: `utils/` holds plain functions and constants (no React, hooks, components or `services/`); `hooks/` may use `utils/` and `services/` but not `components/`; `components/` show state and reach the server only through `hooks/`. `testing/` fixtures are imported by tests only.
+- In a feature: `utils/` holds plain functions and constants (no React, hooks, components or `services/`); `hooks/` may use `utils/` and `services/` but not `components/`; `components/` show state and reach the server only through `hooks/`. `fixtures/` are imported by tests only.
 - Code used by two or more features moves up to `src/utils/`, `src/hooks/` or `src/components/`; those folders are created when a second feature needs them, not before.
 
 ## Capability -> Architecture Map

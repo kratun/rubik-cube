@@ -6,16 +6,16 @@ import tseslint from "typescript-eslint";
 
 // Where a feature file may import from (architecture spine, "Frontend layout rules"): utils are plain functions
 // without React, hooks do not know components, components reach the server only through hooks.
-const testingOnly = {
-  group: ["**/testing/**"],
-  message: "Fixtures in testing/ are for tests only.",
+const fixturesOnly = {
+  group: ["**/fixtures/**"],
+  message: "Fixtures in fixtures/ are for tests only.",
 };
 const productionFiles = ["src/**/*.{ts,tsx}"];
-const testFiles = ["src/**/*.test.{ts,tsx}", "src/**/testing/**", "src/setupTests.ts"];
+const testFiles = ["src/**/*.test.{ts,tsx}", "src/**/fixtures/**", "src/setupTests.ts"];
 const restrict = (files, ...patterns) => ({
   files,
   ignores: testFiles,
-  rules: { "no-restricted-imports": ["error", { patterns: [testingOnly, ...patterns] }] },
+  rules: { "no-restricted-imports": ["error", { patterns: [fixturesOnly, ...patterns] }] },
 });
 export default tseslint.config(
   { ignores: ["dist", "src/services/types/generated"] },
