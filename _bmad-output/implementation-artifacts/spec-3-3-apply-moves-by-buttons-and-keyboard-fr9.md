@@ -2,7 +2,7 @@
 title: 'Story 3.3: Apply moves by buttons and keyboard (FR9)'
 type: 'feature'
 created: '2026-10-18'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 baseline_commit: '09a57783d77e84a0702d338c742b6229ab1e0f3b'
 review_loop_iteration: 0
