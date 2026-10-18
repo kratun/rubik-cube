@@ -6,7 +6,10 @@ import {
   HTTP_POST,
   MOVES_SEGMENT,
   NETWORK_ERROR_MESSAGE,
+  RESET_SEGMENT,
+  UNDO_SEGMENT,
 } from "../../api/client";
+import type { CubeState } from "../../api/types";
 import {
   NOT_FOUND_DETAIL,
   SERVER_ERROR_DETAIL,
@@ -20,7 +23,9 @@ import {
 } from "./apiResponseFixture";
 import { CubePage, START_NEW_CUBE_LABEL } from "./CubePage";
 import { EXPLODED_VIEW_HEADING, FACE_NAMES, faceLabel } from "./CubeView";
+import { NO_MOVES_MESSAGE } from "./MoveHistory";
 import { MOVE_PAD_LABEL } from "./MovePad";
+import { RESET_LABEL, UNDO_LABEL } from "./SessionControls";
 import { MOVED_CUBE } from "./movedCubeFixture";
 import { MOVE_TOKENS } from "./moves";
 import { cubePagePath } from "./sessionUrl";
@@ -32,6 +37,7 @@ const UNKNOWN_PATH = "/cubes/unknown";
 const FRONT_COLOUR = "Green";
 const TILES_PER_FACE = 9;
 const LINE_BREAK = "\n";
+const CUBE_URL = `${CUBES_PATH}/${SOLVED_CUBE_ID}`;
 
 function openUrl(path: string) {
   window.history.replaceState(null, "", path);
@@ -44,6 +50,10 @@ async function expectUrlOfSolvedCube() {
   });
 }
 
+function explodedViewText() {
+  return screen.getByRole("region", { name: EXPLODED_VIEW_HEADING }).querySelector("pre")
+    ?.textContent;
+}
 afterEach(() => {
   vi.restoreAllMocks();
   openUrl(ROOT);
@@ -111,19 +121,13 @@ describe("CubePage", () => {
     const COUNTER_CLOCKWISE_TOKEN = "U'";
     const MODIFIERS = ["Control", "Alt", "Meta"];
     const BAD_REQUEST_DETAIL = "Unknown move token.";
-    const MOVES_URL = `${CUBES_PATH}/${SOLVED_CUBE_ID}/${MOVES_SEGMENT}`;
-    const CUBE_URL = `${CUBES_PATH}/${SOLVED_CUBE_ID}`;
+    const MOVES_URL = `${CUBE_URL}/${MOVES_SEGMENT}`;
     const MOVE_BODY_ARGUMENT = 1;
 
     async function showSolvedCube() {
       openUrl(cubePagePath(SOLVED_CUBE_ID));
       render(<CubePage />);
       await screen.findByRole("group", { name: faceLabel("up") });
-    }
-
-    function explodedViewText() {
-      return screen.getByRole("region", { name: EXPLODED_VIEW_HEADING }).querySelector("pre")
-        ?.textContent;
     }
 
     function moveCalls(fetchMock: { mock: { calls: unknown[][] } }) {
@@ -214,7 +218,8 @@ describe("CubePage", () => {
 
       expect(await screen.findByRole("alert")).toHaveTextContent(detail);
       expect(explodedViewText()).toBe(SOLVED_EXPLODED_VIEW.join(LINE_BREAK));
-      expect(screen.getAllByRole("button")).toHaveLength(MOVE_TOKENS.length);
+      const pad = screen.getByRole("group", { name: MOVE_PAD_LABEL });
+      expect(within(pad).getAllByRole("button")).toHaveLength(MOVE_TOKENS.length);
     });
 
     it("shows the network message, stays usable and accepts the next move", async () => {
@@ -250,6 +255,131 @@ describe("CubePage", () => {
       expect(explodedViewText()).toBe(MOVED_CUBE.explodedView.join(LINE_BREAK));
       expect(moveCalls(fetchMock)).toHaveLength(1);
       expect(fetchMock).toHaveBeenLastCalledWith(CUBE_URL, { method: HTTP_GET });
+    });
+  });
+
+  describe("history, undo and reset", () => {
+    const HISTORY = ["F", "R'", "U"];
+    const CUBE_WITH_HISTORY = { ...MOVED_CUBE, moves: HISTORY };
+    const BAD_REQUEST_DETAIL = "The revision does not match.";
+    const ACTIONS = [
+      { label: UNDO_LABEL, segment: UNDO_SEGMENT },
+      { label: RESET_LABEL, segment: RESET_SEGMENT },
+    ];
+
+    async function showCube(cube: CubeState) {
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(cube));
+      openUrl(cubePagePath(SOLVED_CUBE_ID));
+      render(<CubePage />);
+      await screen.findByRole("group", { name: faceLabel("up") });
+    }
+
+    function historyTexts() {
+      return screen.getAllByRole("listitem").map((item) => item.textContent);
+    }
+
+    function callsTo(segment: string) {
+      return vi
+        .mocked(globalThis.fetch)
+        .mock.calls.filter(([url]) => url === `${CUBE_URL}/${segment}`);
+    }
+
+    it("lists the moves of the session in order", async () => {
+      await showCube(CUBE_WITH_HISTORY);
+
+      expect(historyTexts()).toEqual(HISTORY);
+    });
+
+    it("says there are no moves yet and disables Undo for an empty session", async () => {
+      await showCube(SOLVED_CUBE);
+
+      expect(screen.getByText(NO_MOVES_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: UNDO_LABEL })).toBeDisabled();
+    });
+
+    it("sends the current revision to undo and shows the state before the last move", async () => {
+      await showCube(MOVED_CUBE);
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
+
+      await userEvent.click(screen.getByRole("button", { name: UNDO_LABEL }));
+
+      await waitFor(() => {
+        expect(explodedViewText()).toBe(SOLVED_EXPLODED_VIEW.join(LINE_BREAK));
+      });
+      expect(callsTo(UNDO_SEGMENT)).toHaveLength(1);
+      expect(requestBodyOf(callsTo(UNDO_SEGMENT)[0])).toEqual({
+        expectedRevision: MOVED_CUBE.revision,
+      });
+      expect(screen.getByText(NO_MOVES_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: UNDO_LABEL })).toBeDisabled();
+    });
+
+    it("moves focus to Reset when the last Undo disables the Undo button", async () => {
+      await showCube(MOVED_CUBE);
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
+
+      await userEvent.click(screen.getByRole("button", { name: UNDO_LABEL }));
+
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: UNDO_LABEL })).toBeDisabled();
+      });
+      expect(screen.getByRole("button", { name: RESET_LABEL })).toHaveFocus();
+    });
+
+    it("calls reset with the current revision and shows an empty history and the Solved State", async () => {
+      await showCube(CUBE_WITH_HISTORY);
+      vi.mocked(globalThis.fetch).mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
+
+      await userEvent.click(screen.getByRole("button", { name: RESET_LABEL }));
+
+      await waitFor(() => {
+        expect(screen.getByText(NO_MOVES_MESSAGE)).toBeInTheDocument();
+      });
+      expect(explodedViewText()).toBe(SOLVED_EXPLODED_VIEW.join(LINE_BREAK));
+      expect(requestBodyOf(callsTo(RESET_SEGMENT)[0])).toEqual({
+        expectedRevision: CUBE_WITH_HISTORY.revision,
+      });
+    });
+
+    describe.each(ACTIONS)("$label failures", ({ label, segment }) => {
+      it.each([
+        [STATUS_BAD_REQUEST, BAD_REQUEST_DETAIL],
+        [STATUS_SERVER_ERROR, SERVER_ERROR_DETAIL],
+      ])("shows the message of a %i and keeps the last good state", async (status, detail) => {
+        await showCube(CUBE_WITH_HISTORY);
+        vi.mocked(globalThis.fetch).mockResolvedValueOnce(errorResponse(status, detail));
+
+        await userEvent.click(screen.getByRole("button", { name: label }));
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(detail);
+        expect(historyTexts()).toEqual(HISTORY);
+        expect(explodedViewText()).toBe(CUBE_WITH_HISTORY.explodedView.join(LINE_BREAK));
+        expect(callsTo(segment)).toHaveLength(1);
+      });
+
+      it("shows the network message and keeps the last good state", async () => {
+        await showCube(CUBE_WITH_HISTORY);
+        vi.mocked(globalThis.fetch).mockRejectedValueOnce(new TypeError("Failed to fetch"));
+
+        await userEvent.click(screen.getByRole("button", { name: label }));
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(NETWORK_ERROR_MESSAGE);
+        expect(historyTexts()).toEqual(HISTORY);
+      });
+
+      it("reloads the session on a 409 and says the cube was changed by someone else", async () => {
+        await showCube(CUBE_WITH_HISTORY);
+        vi.mocked(globalThis.fetch)
+          .mockResolvedValueOnce(errorResponse(STATUS_CONFLICT, SERVER_ERROR_DETAIL))
+          .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
+
+        await userEvent.click(screen.getByRole("button", { name: label }));
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(CONFLICT_MESSAGE);
+        expect(screen.getByText(NO_MOVES_MESSAGE)).toBeInTheDocument();
+        expect(callsTo(segment)).toHaveLength(1);
+        expect(globalThis.fetch).toHaveBeenLastCalledWith(CUBE_URL, { method: HTTP_GET });
+      });
     });
   });
 });

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
 import type { ApiResult } from "../../api/apiResult";
-import { applyMoves, createCube, getCube } from "../../api/client";
+import { applyMoves, createCube, getCube, resetCube, undoMove } from "../../api/client";
 import type { CubeState } from "../../api/types";
 import { cubePagePath } from "./sessionUrl";
 
@@ -52,7 +52,11 @@ export interface CubeSession {
   state: SessionState;
   startNewCube: () => void;
   applyMove: (token: string) => void;
+  undo: () => void;
+  reset: () => void;
 }
+
+type SendMutation = (cubeId: string, expectedRevision: string) => Promise<ApiResult<CubeState>>;
 
 /**
  * The session of the cube in the URL (AD-9): loads `cubeId`, or creates a cube when there is none,
@@ -94,14 +98,16 @@ export function useCubeSession(cubeId: string | null): CubeSession {
     });
   }, []);
 
-  const applyMove = useCallback(
-    (token: string) => {
+  // The one path for every change of the cube (move, undo, reset): the same revision check,
+  // in-flight guard, last-good-state notice and 409 reload (AD-9).
+  const mutate = useCallback(
+    (send: SendMutation) => {
       if (state.status !== "ready" || moveInFlight.current) {
         return;
       }
       const { cubeId: id, revision } = state.cube;
       moveInFlight.current = true;
-      void applyMoves(id, revision, [token]).then(async (result) => {
+      void send(id, revision).then(async (result) => {
         if (result.ok) {
           dispatch({ type: "loaded", cube: result.data, notice: null });
         } else if (result.status === HTTP_CONFLICT) {
@@ -120,5 +126,18 @@ export function useCubeSession(cubeId: string | null): CubeSession {
     [state],
   );
 
-  return { state, startNewCube, applyMove };
+  const applyMove = useCallback(
+    (token: string) => {
+      mutate((id, revision) => applyMoves(id, revision, [token]));
+    },
+    [mutate],
+  );
+  const undo = useCallback(() => {
+    mutate(undoMove);
+  }, [mutate]);
+  const reset = useCallback(() => {
+    mutate(resetCube);
+  }, [mutate]);
+
+  return { state, startNewCube, applyMove, undo, reset };
 }
