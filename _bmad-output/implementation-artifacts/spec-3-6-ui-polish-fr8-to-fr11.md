@@ -2,7 +2,7 @@
 title: 'Story 3.6: UI polish (FR8 to FR11)'
 type: 'feature'
 created: '2026-10-18'
-status: 'in-review'
+status: 'done'
 baseline_commit: '6ccd88c4c285e3c898f083cc1022b795ca187aa7'
 route: 'dispatch'
 review_loop_iteration: 0
