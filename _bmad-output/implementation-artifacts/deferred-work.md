@@ -31,3 +31,7 @@
 ## Deferred from: code review of refactor/web-folder-structure (2026-10-18)
 
 - The ESLint layer rules in `web/eslint.config.js` (`no-restricted-imports`) are only checked by `npm run lint`; no vitest case proves that a violation fails, and no CI job runs lint yet. Add a test that lints virtual files with the ESLint API (for example a component importing `services/client`, a util importing `react`, a hook importing a component, production code importing a fixture) at the quality pass (Story 4.2) or with CI (Story 5.3). Until then the rules were checked once by hand with temporary violating files.
+
+- source_spec: none
+  summary: Idea from the owner (2026-10-18), not decided: add a textarea with an Apply button for typing a move sequence, and let the "Apply TTC test sequence" button put the TTC text into that textarea for testing.
+  evidence: Open choices: its own story (3.7) or part of 3.6; whether Apply appends to the current cube or resets first; whether the TTC button only fills the text or also applies it. Taking it changes the Story 3.5 acceptance criterion ("one click") and the e2e flow (an extra click). The API already validates tokens (400), so the frontend would only split the text on whitespace.

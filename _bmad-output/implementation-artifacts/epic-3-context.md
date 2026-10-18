@@ -13,6 +13,7 @@ A reviewer sees the cube as coloured tiles and as text, turns it by buttons and 
 - Story 3.3: Apply moves by buttons and keyboard (FR9)
 - Story 3.4: Move history, undo and reset (FR11)
 - Story 3.5: TTC Test Sequence in one click and the end-to-end check (FR10, NFR3)
+- Story 3.6: UI polish (FR8 to FR11)
 
 ## Requirements & Constraints
 
