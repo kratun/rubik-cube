@@ -2,7 +2,7 @@
 title: 'Story 4.2b: WCAG 2.1 AA audit'
 type: 'chore'
 created: '2026-10-18'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 review_loop_iteration: 0
 baseline_commit: 'fb1f17caba15b1ec22c51e2627dbe3b9a4f273f8'

@@ -2,7 +2,7 @@
 title: 'Story 4.2a: Quality pass and cleanup (NFR3, NFR5)'
 type: 'chore'
 created: '2026-10-18'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 review_loop_iteration: 0
 baseline_commit: '448a3c3854b945533a304356fefa11b5073080ea'
