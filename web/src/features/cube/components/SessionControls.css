@@ -1,0 +1,37 @@
+/* Row 1: Undo and Reset on the left, the exploded view on the right; row 2: the TTC preset across the full width. */
+.session-controls {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.session-controls .group-label,
+.button-primary,
+.busy-cue {
+  grid-column: 1 / -1;
+}
+
+.exploded-view-opener {
+  justify-self: end;
+}
+
+.button-primary {
+  --button-bg: var(--colour-accent);
+  --button-bg-hover: var(--colour-accent-strong);
+  --button-border: var(--colour-accent);
+  --button-fg: var(--colour-on-accent);
+}
+
+.button-danger {
+  --button-bg: var(--colour-surface);
+  --button-bg-hover: var(--colour-danger-soft);
+  --button-border: var(--colour-danger);
+  --button-fg: var(--colour-danger);
+}
+
+.busy-cue {
+  min-height: 1.5rem;
+  color: var(--colour-muted);
+  font-style: italic;
+}

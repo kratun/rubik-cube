@@ -110,13 +110,13 @@ So that the cube and the TTC result are the first thing I see and I can tell wha
 
 **Given** a session with moves
 **When** I look at the history
-**Then** it reads as one wrapping line of moves in order (for example `F R' U B' L D'`, one chip or span per move) instead of a tall numbered list
+**Then** it reads as one wrapping line of moves in order (for example `F R' U B' L D'`, one chip or span per move) instead of a tall numbered list; the chips have the size of the move buttons but are flat (no raised edge, no hover colour), and a long history scrolls inside its box, which ends at the bottom of the cube beside it (a fixed maximum height when the parts are stacked)
 **And** an empty session still says "No moves yet", and the history stays a list for assistive technology.
 
 **Given** the controls
 **When** I look at them
-**Then** the twelve move buttons are larger, grouped by face with clear spacing, and sit under a visible "Moves" label
-**And** Undo, Reset and "Apply TTC test sequence" are in a separate, labelled group, Reset is styled as the destructive action, and the TTC preset is visually the primary action.
+**Then** the twelve move buttons are larger, raised, grouped by face with clear spacing, and sit under a visible "Moves" label, below the Session group
+**And** Undo, Reset, "Show exploded view" and "Apply TTC test sequence" are in a separate, labelled "Session" group above the moves: Undo and Reset on the left and the exploded view button on the right of the first row, the TTC preset across the second row; Reset is styled as the destructive action and the TTC preset is visually the primary action.
 
 **Given** a button has keyboard focus or is hovered
 **When** I look at it
@@ -129,7 +129,8 @@ So that the cube and the TTC result are the first thing I see and I can tell wha
 
 **Given** the tiles and the exploded text view
 **When** I look at them
-**Then** light tiles (white, yellow) have a visible edge on the page background, each face has a visible label, and the text view has a larger monospace font under its heading so it can be compared with the PDF line by line.
+**Then** light tiles (white, yellow) have a visible edge on the page background and each face has a visible label
+**And** the text view is closed by default and opens in a modal dialog under the heading "Exploded view" (larger monospace font, so it can be compared with the PDF line by line); Escape, a Close button or a click outside closes it, focus goes to Close on opening and back to the opener on closing, and the move keys do nothing while it is open.
 
 **Given** an error or the "changed by someone else" message
 **When** it is shown
@@ -465,7 +466,7 @@ So that I can compare it with the PDF and reopen the same cube.
 
 **Given** a session
 **When** the cube is displayed
-**Then** the six faces appear as 3x3 coloured tiles in the exploded layout, each tile exposes its colour name to assistive technology, and the text view shows the `explodedView` lines unchanged.
+**Then** the six faces appear as 3x3 coloured tiles in the exploded layout, each tile exposes its colour name to assistive technology, and the text view (opened on request since Story 3.6) shows the `explodedView` lines unchanged.
 
 **Given** a session in the URL
 **When** I reload the page or open the link elsewhere
@@ -551,7 +552,7 @@ So that I can compare the result with the PDF immediately.
 
 **Given** a solved session
 **When** I press "Apply TTC test sequence"
-**Then** the text view equals the nine expected lines and the history reads `F R' U B' L D'`.
+**Then** the text view (opened with "Show exploded view") equals the nine expected lines and the history reads `F R' U B' L D'`.
 
 **Given** a session that already has moves
 **When** I press the same button

@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   CUBES_PATH,
@@ -22,10 +22,18 @@ import {
   requestBodyOf,
 } from "./fixtures/apiResponseFixture";
 import { CubePage, START_NEW_CUBE_LABEL } from "./CubePage";
-import { EXPLODED_VIEW_HEADING, FACE_NAMES, faceLabel } from "./components/CubeView";
+import { FACE_NAMES, faceLabel } from "./components/CubeView";
+import { EXPLODED_VIEW_HEADING } from "./components/ExplodedView";
 import { NO_MOVES_MESSAGE } from "./components/MoveHistory";
 import { MOVE_PAD_LABEL } from "./components/MovePad";
-import { RESET_LABEL, TTC_LABEL, UNDO_LABEL } from "./components/SessionControls";
+import {
+  BUSY_LABEL,
+  RESET_LABEL,
+  SESSION_CONTROLS_LABEL,
+  SHOW_EXPLODED_VIEW_LABEL,
+  TTC_LABEL,
+  UNDO_LABEL,
+} from "./components/SessionControls";
 import { MOVED_CUBE } from "./fixtures/movedCubeFixture";
 import { TTC_CUBE, TTC_EXPLODED_VIEW, TTC_HISTORY } from "./fixtures/ttcCubeFixture";
 import { MOVE_TOKENS } from "./utils/moves";
@@ -37,6 +45,10 @@ import { CONFLICT_MESSAGE, CUBE_NOT_FOUND_MESSAGE } from "./hooks/useCubeSession
 const ROOT = "/";
 const UNKNOWN_PATH = "/cubes/unknown";
 const FRONT_COLOUR = "Green";
+const FIRST_TOKEN = "F";
+const BUSY_ATTRIBUTE = "aria-busy";
+const BUSY_ATTRIBUTE_ON = "true";
+const BUSY_ATTRIBUTE_OFF = "false";
 const TILES_PER_FACE = 9;
 const LINE_BREAK = "\n";
 const HISTORY_SEPARATOR = " ";
@@ -54,8 +66,13 @@ async function expectUrlOfSolvedCube() {
   });
 }
 
+// The exploded view starts closed; the first call opens its dialog and it stays open for the rest of the test.
 function explodedViewText() {
-  return screen.getByRole("region", { name: EXPLODED_VIEW_HEADING }).querySelector("pre")
+  const showButton = screen.queryByRole("button", { name: SHOW_EXPLODED_VIEW_LABEL });
+  if (showButton !== null) {
+    fireEvent.click(showButton);
+  }
+  return screen.getByRole("dialog", { name: EXPLODED_VIEW_HEADING }).querySelector("pre")
     ?.textContent;
 }
 async function showCube(cube: CubeState) {
@@ -101,8 +118,7 @@ describe("CubePage", () => {
 
     const front = await screen.findByRole("group", { name: faceLabel("front") });
     expect(within(front).getAllByRole("img", { name: FRONT_COLOUR })).toHaveLength(TILES_PER_FACE);
-    const view = screen.getByRole("region", { name: EXPLODED_VIEW_HEADING });
-    expect(view.querySelector("pre")?.textContent).toBe(SOLVED_EXPLODED_VIEW.join(LINE_BREAK));
+    expect(explodedViewText()).toBe(SOLVED_EXPLODED_VIEW.join(LINE_BREAK));
   });
 
   it("loads the cube in the URL again on reload", async () => {
@@ -535,6 +551,45 @@ describe("CubePage", () => {
       await expectTtcResult();
       expect(callsTo(RESET_SEGMENT)).toHaveLength(1);
       expect(callsTo(MOVES_SEGMENT)).toHaveLength(1);
+    });
+  });
+
+  describe("busy state", () => {
+    it("shows a busy cue and keeps focus on the clicked button until the answer arrives", async () => {
+      await showCube(SOLVED_CUBE);
+      let answerMove: (response: Response) => void = () => undefined;
+      vi.mocked(globalThis.fetch).mockReturnValueOnce(
+        new Promise<Response>((resolve) => {
+          answerMove = resolve;
+        }),
+      );
+      const moveButton = screen.getByRole("button", { name: FIRST_TOKEN });
+      expect(screen.queryByText(BUSY_LABEL)).not.toBeInTheDocument();
+
+      await userEvent.click(moveButton);
+      await userEvent.click(moveButton);
+
+      expect(screen.getByText(BUSY_LABEL)).toBeInTheDocument();
+      expect(screen.getByRole("group", { name: MOVE_PAD_LABEL })).toHaveAttribute(
+        BUSY_ATTRIBUTE,
+        BUSY_ATTRIBUTE_ON,
+      );
+      expect(screen.getByRole("group", { name: SESSION_CONTROLS_LABEL })).toHaveAttribute(
+        BUSY_ATTRIBUTE,
+        BUSY_ATTRIBUTE_ON,
+      );
+      expect(moveButton).toHaveFocus();
+      expect(callsTo(MOVES_SEGMENT)).toHaveLength(1);
+
+      answerMove(jsonResponse(MOVED_CUBE));
+
+      await waitFor(() => {
+        expect(screen.queryByText(BUSY_LABEL)).not.toBeInTheDocument();
+      });
+      expect(screen.getByRole("group", { name: MOVE_PAD_LABEL })).toHaveAttribute(
+        BUSY_ATTRIBUTE,
+        BUSY_ATTRIBUTE_OFF,
+      );
     });
   });
 });

@@ -342,6 +342,73 @@ describe("useCubeSession", () => {
       expect(fetchMock.mock.calls.filter(([url]) => url === MOVES_URL)).toHaveLength(1);
     });
 
+    it("is busy from the start of a move until the answer arrives", async () => {
+      let resolveMove: (response: Response) => void = () => undefined;
+      vi.spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
+        .mockReturnValueOnce(
+          new Promise<Response>((resolve) => {
+            resolveMove = resolve;
+          }),
+        );
+      const { result } = await readySession();
+      expect(result.current.busy).toBe(false);
+
+      act(() => {
+        result.current.applyMove(TOKEN);
+      });
+      expect(result.current.busy).toBe(true);
+      await act(async () => {
+        resolveMove(jsonResponse(MOVED_CUBE));
+        await Promise.resolve();
+      });
+
+      await waitFor(() => {
+        expect(result.current.busy).toBe(false);
+      });
+    });
+
+    it.each([
+      ["a server error", errorResponse(STATUS_SERVER_ERROR, SERVER_ERROR_DETAIL)],
+      ["a conflict", errorResponse(STATUS_CONFLICT, SERVER_ERROR_DETAIL)],
+    ])("stops being busy after %s", async (_name, failure) => {
+      vi.spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
+        .mockResolvedValueOnce(failure)
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
+      const { result } = await readySession();
+
+      act(() => {
+        result.current.applyMove(TOKEN);
+      });
+
+      await waitFor(() => {
+        expect(result.current.busy).toBe(false);
+      });
+      expect(result.current.state.status).toBe("ready");
+    });
+
+    it("accepts the next move once the answer arrived", async () => {
+      const fetchMock = vi
+        .spyOn(globalThis, "fetch")
+        .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
+        .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
+        .mockResolvedValueOnce(jsonResponse(MOVED_CUBE));
+      const { result } = await readySession();
+
+      act(() => {
+        result.current.applyMove(TOKEN);
+      });
+      await waitFor(() => {
+        expect(result.current.busy).toBe(false);
+      });
+      act(() => {
+        result.current.applyMove(SECOND_TOKEN);
+      });
+
+      expect(fetchMock.mock.calls.filter(([url]) => url === MOVES_URL)).toHaveLength(2);
+    });
+
     it("keeps the cube and shows the reload error when the reload after a 409 fails", async () => {
       vi.spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))

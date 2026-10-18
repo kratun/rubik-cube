@@ -5,7 +5,8 @@ const FIXTURES_DIR = new URL("../../tests/Fixtures/", import.meta.url);
 const FILE_ENCODING = "utf8";
 const HISTORY_SEPARATOR = " ";
 const TTC_BUTTON_NAME = "Apply TTC test sequence";
-const EXPLODED_VIEW_REGION = "Exploded view";
+const EXPLODED_VIEW_DIALOG = "Exploded view";
+const SHOW_EXPLODED_VIEW_BUTTON = "Show exploded view";
 const HISTORY_REGION = "History";
 
 const EXPLODED_VIEW_FILE = "ttc-exploded-view.txt";
@@ -24,7 +25,8 @@ test("the TTC test sequence button shows the expected exploded view and history"
   await page.goto("/");
   await page.getByRole("button", { name: TTC_BUTTON_NAME }).click();
 
-  const view = page.getByRole("region", { name: EXPLODED_VIEW_REGION }).locator("pre");
+  await page.getByRole("button", { name: SHOW_EXPLODED_VIEW_BUTTON }).click();
+  const view = page.getByRole("dialog", { name: EXPLODED_VIEW_DIALOG }).locator("pre");
   // textContent keeps the leading spaces of the net; toHaveText would collapse whitespace.
   await expect.poll(() => view.textContent()).toBe(expectedView);
   const history = page.getByRole("region", { name: HISTORY_REGION }).getByRole("listitem");

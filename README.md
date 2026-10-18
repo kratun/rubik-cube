@@ -120,7 +120,7 @@ VITE v8.3.4  ready in 771 ms
 ➜  Local:   http://localhost:5173/
 ```
 
-Open <http://localhost:5173>. The page creates a cube and moves to `/cubes/<cubeId>`; open that link again to get the same cube. Press **Apply TTC test sequence**. The history reads `F R' U B' L D'` and the exploded view is the nine lines shown under "Run the tests". The button first resets a cube that already has moves, so the result is always the same. Stop both servers with Ctrl+C.
+Open <http://localhost:5173>. The page creates a cube and moves to `/cubes/<cubeId>`; open that link again to get the same cube. Press **Apply TTC test sequence**. The history reads `F R' U B' L D'`; press **Show exploded view** to see the nine lines shown under "Run the tests". The button first resets a cube that already has moves, so the result is always the same. Stop both servers with Ctrl+C.
 
 ### Test commands
 

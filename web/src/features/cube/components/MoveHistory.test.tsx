@@ -26,6 +26,12 @@ describe("MoveHistory", () => {
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 
+  it("can be focused so a long list can be scrolled with the keyboard", () => {
+    render(<MoveHistory moves={MOVES} />);
+
+    expect(screen.getByRole("list", { name: HISTORY_HEADING })).toHaveAttribute("tabindex", "0");
+  });
+
   it("is a region named by its heading", () => {
     render(<MoveHistory moves={[]} />);
 

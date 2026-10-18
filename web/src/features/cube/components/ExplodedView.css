@@ -1,0 +1,39 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: var(--colour-backdrop);
+}
+
+.modal {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.75rem;
+  background: var(--colour-surface);
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 35%);
+}
+
+.modal h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.modal pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--colour-border);
+  border-radius: 0.5rem;
+  background: var(--colour-page);
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  line-height: 1.5;
+}

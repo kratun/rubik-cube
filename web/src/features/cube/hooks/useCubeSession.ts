@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import type { ApiResult } from "../../../services/types/apiResult";
 import { applyMoves, createCube, getCube, resetCube, undoMove } from "../../../services/client";
 import type { CubeState } from "../../../services/types";
@@ -51,6 +51,8 @@ function actionFor(result: ApiResult<CubeState>, isLoad: boolean): SessionAction
 
 export interface CubeSession {
   state: SessionState;
+  /** True from the start of a change until the server answered it (move, undo, reset, TTC sequence). */
+  busy: boolean;
   startNewCube: () => void;
   applyMove: (token: string) => void;
   undo: () => void;
@@ -96,6 +98,8 @@ export function useCubeSession(cubeId: string | null): CubeSession {
   const [state, dispatch] = useReducer(sessionReducer, INITIAL_STATE);
   // A second move sent before the first answers would carry the same stale revision (a false 409).
   const moveInFlight = useRef(false);
+  // The ref blocks the next click at once; this state only lets the page show that a change is running.
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -137,6 +141,7 @@ export function useCubeSession(cubeId: string | null): CubeSession {
       }
       const id = state.cube.cubeId;
       moveInFlight.current = true;
+      setBusy(true);
       void send(state.cube).then(async ({ result, confirmed }) => {
         if (result.ok) {
           dispatch({ type: "loaded", cube: result.data, notice: null });
@@ -156,6 +161,7 @@ export function useCubeSession(cubeId: string | null): CubeSession {
         } else {
           dispatch({ type: "moveFailed", message: result.error.detail });
         }
+        setBusy(false);
       });
     },
     [state],
@@ -177,5 +183,5 @@ export function useCubeSession(cubeId: string | null): CubeSession {
     mutate(resetThenApplyTtc);
   }, [mutate]);
 
-  return { state, startNewCube, applyMove, undo, reset, applyTtcSequence };
+  return { state, busy, startNewCube, applyMove, undo, reset, applyTtcSequence };
 }

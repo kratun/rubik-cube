@@ -1,0 +1,33 @@
+/* The area `view` is named in CubeView.css; `side` is the controls and the history. */
+.cube-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "view"
+    "side";
+  gap: 1.5rem;
+}
+
+.cube-page-side {
+  grid-area: side;
+  display: grid;
+  gap: 1.25rem;
+  align-content: start;
+}
+
+/* Side by side the pair is centred as a whole, and the history grows to the bottom of the cube. */
+@media (min-width: 60rem) {
+  .cube-page {
+    grid-template-columns: max-content minmax(18rem, 22rem);
+    grid-template-areas: "view side";
+    justify-content: center;
+    gap: 2.5rem;
+    align-items: stretch;
+  }
+
+  .cube-page-side {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+}
