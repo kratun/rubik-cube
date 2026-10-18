@@ -36,7 +36,10 @@ public class ErrorReporterTests
 
         var details = Reporter.Report(context, Status, Title, Detail);
 
-        Assert.Equal(new ErrorDetails(string.Format(ExpectedTypeFormat, Status), Title, Status, Detail, TraceId), details);
+        Assert.Equal(
+            new ErrorDetails(string.Format(ExpectedTypeFormat, Status), Title, Status, Detail, TraceId),
+            details
+        );
         var record = Assert.Single(logger.Collector.GetSnapshot());
         Assert.Equal(LogLevel.Warning, record.Level);
         Assert.Null(record.Exception);
@@ -63,7 +66,13 @@ public class ErrorReporterTests
 
         Reporter.Report(context, Status, Title, Detail);
 
-        AssertState(Assert.Single(logger.Collector.GetSnapshot()), $"{Method} {RequestPath}", cubeId: null, Status, TraceId);
+        AssertState(
+            Assert.Single(logger.Collector.GetSnapshot()),
+            $"{Method} {RequestPath}",
+            cubeId: null,
+            Status,
+            TraceId
+        );
     }
 
     [Fact]
@@ -75,29 +84,47 @@ public class ErrorReporterTests
 
         Reporter.Report(context, Status, Title, Detail);
 
-        AssertState(Assert.Single(logger.Collector.GetSnapshot()), $"{Method} {RequestPath}", cubeId: null, Status, TraceId);
+        AssertState(
+            Assert.Single(logger.Collector.GetSnapshot()),
+            $"{Method} {RequestPath}",
+            cubeId: null,
+            Status,
+            TraceId
+        );
     }
 
     [Fact]
     public void Report_InsideTheExceptionHandler_ReadsEndpointAndRouteValuesFromTheFeature()
     {
         var cubeId = Guid.NewGuid();
-        context.Features.Set<IExceptionHandlerFeature>(new ExceptionHandlerFeature
-        {
-            Error = new InvalidOperationException(),
-            Endpoint = ActionEndpoint(),
-            RouteValues = new RouteValueDictionary { [IdRouteKey] = cubeId },
-        });
+        context.Features.Set<IExceptionHandlerFeature>(
+            new ExceptionHandlerFeature
+            {
+                Error = new InvalidOperationException(),
+                Endpoint = ActionEndpoint(),
+                RouteValues = new RouteValueDictionary { [IdRouteKey] = cubeId },
+            }
+        );
 
         Reporter.Report(context, Status, Title, Detail);
 
-        AssertState(Assert.Single(logger.Collector.GetSnapshot()), $"{ControllerName}.{ActionName}", cubeId.ToString(), Status, TraceId);
+        AssertState(
+            Assert.Single(logger.Collector.GetSnapshot()),
+            $"{ControllerName}.{ActionName}",
+            cubeId.ToString(),
+            Status,
+            TraceId
+        );
     }
 
-    private static Endpoint ActionEndpoint() => new(
-        requestDelegate: null,
-        new EndpointMetadataCollection(new ControllerActionDescriptor { ControllerName = ControllerName, ActionName = ActionName }),
-        displayName: null);
+    private static Endpoint ActionEndpoint() =>
+        new(
+            requestDelegate: null,
+            new EndpointMetadataCollection(
+                new ControllerActionDescriptor { ControllerName = ControllerName, ActionName = ActionName }
+            ),
+            displayName: null
+        );
 
     private static void AssertState(FakeLogRecord record, string operation, string? cubeId, int status, string traceId)
     {

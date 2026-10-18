@@ -2,21 +2,43 @@ using System.Xml.Linq;
 
 namespace Rubik.Api.Tests.Architecture;
 
-/// <summary>Reads the declared ProjectReference edges of every src project, so an unused reference is still seen.</summary>
+/// <summary>
+/// Reads the declared ProjectReference and PackageReference items of every src project, so an unused one is still seen.
+/// </summary>
 internal static class ProjectGraph
 {
-    public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> Load()
+    private const string ProjectReferenceElement = "ProjectReference";
+    private const string PackageReferenceElement = "PackageReference";
+    private const string IncludeAttribute = "Include";
+
+    public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> Load() =>
+        LoadItems(
+            ProjectReferenceElement,
+            include => Path.GetFileNameWithoutExtension(include.Replace('\\', Path.DirectorySeparatorChar))
+        );
+
+    public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> LoadPackages() =>
+        LoadItems(PackageReferenceElement, include => include);
+
+    private static IReadOnlyDictionary<string, IReadOnlyCollection<string>> LoadItems(
+        string elementName,
+        Func<string, string> nameOf
+    )
     {
         var srcDirectory = Path.Combine(FindRepositoryRoot(), "src");
 
-        return Directory.GetFiles(srcDirectory, "*.csproj", SearchOption.AllDirectories)
+        return Directory
+            .GetFiles(srcDirectory, "*.csproj", SearchOption.AllDirectories)
             .ToDictionary(
                 project => Path.GetFileNameWithoutExtension(project),
-                project => (IReadOnlyCollection<string>)XDocument.Load(project)
-                    .Descendants("ProjectReference")
-                    .Select(reference => Path.GetFileNameWithoutExtension(
-                        ((string)reference.Attribute("Include")!).Replace('\\', Path.DirectorySeparatorChar)))
-                    .ToArray());
+                project =>
+                    (IReadOnlyCollection<string>)
+                        XDocument
+                            .Load(project)
+                            .Descendants(elementName)
+                            .Select(item => nameOf((string)item.Attribute(IncludeAttribute)!))
+                            .ToArray()
+            );
     }
 
     private static string FindRepositoryRoot()

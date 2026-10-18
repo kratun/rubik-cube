@@ -23,36 +23,33 @@ public class ExplodedViewRendererTests
     private const int FourthSlot = 3;
 
     // Where each face's first tile sits in the text lines of the net: its first line and its character offset.
-    private static readonly IReadOnlyDictionary<Face, (int FirstLine, int Offset)> NetPositions =
-        new Dictionary<Face, (int, int)>
-        {
-            [Face.Up] = (TopBandLine, SecondSlot * FaceStride),
-            [Face.Left] = (MiddleBandLine, LeftmostSlot * FaceStride),
-            [Face.Front] = (MiddleBandLine, SecondSlot * FaceStride),
-            [Face.Right] = (MiddleBandLine, ThirdSlot * FaceStride),
-            [Face.Back] = (MiddleBandLine, FourthSlot * FaceStride),
-            [Face.Down] = (BottomBandLine, SecondSlot * FaceStride),
-        };
-
-    public static TheoryData<string> SequencesAgainstIndependentNetReader => new()
+    private static readonly IReadOnlyDictionary<Face, (int FirstLine, int Offset)> NetPositions = new Dictionary<
+        Face,
+        (int, int)
+    >
     {
-        string.Empty,
-        "U",
-        "R'",
-        "B L'",
-        "F R' U B' L D'",
+        [Face.Up] = (TopBandLine, SecondSlot * FaceStride),
+        [Face.Left] = (MiddleBandLine, LeftmostSlot * FaceStride),
+        [Face.Front] = (MiddleBandLine, SecondSlot * FaceStride),
+        [Face.Right] = (MiddleBandLine, ThirdSlot * FaceStride),
+        [Face.Back] = (MiddleBandLine, FourthSlot * FaceStride),
+        [Face.Down] = (BottomBandLine, SecondSlot * FaceStride),
     };
+
+    public static TheoryData<string> SequencesAgainstIndependentNetReader =>
+        new() { string.Empty, "U", "R'", "B L'", "F R' U B' L D'" };
 
     // Hard-coded on purpose: independent of the production Face-to-normal and colour mappings.
-    public static TheoryData<Face, Color> SolvedFaces => new()
-    {
-        { Face.Front, Color.Green },
-        { Face.Right, Color.Red },
-        { Face.Up, Color.White },
-        { Face.Back, Color.Blue },
-        { Face.Left, Color.Orange },
-        { Face.Down, Color.Yellow },
-    };
+    public static TheoryData<Face, Color> SolvedFaces =>
+        new()
+        {
+            { Face.Front, Color.Green },
+            { Face.Right, Color.Red },
+            { Face.Up, Color.White },
+            { Face.Back, Color.Blue },
+            { Face.Left, Color.Orange },
+            { Face.Down, Color.Yellow },
+        };
 
     private static readonly IReadOnlyList<string> SolvedLines =
     [
@@ -74,11 +71,14 @@ public class ExplodedViewRendererTests
         var view = ExplodedViewRenderer.Render(new Cube());
 
         Assert.Equal(GridSize, view.Faces[face].Count);
-        Assert.All(view.Faces[face], row =>
-        {
-            Assert.Equal(GridSize, row.Count);
-            Assert.All(row, color => Assert.Equal(expected, color));
-        });
+        Assert.All(
+            view.Faces[face],
+            row =>
+            {
+                Assert.Equal(GridSize, row.Count);
+                Assert.All(row, color => Assert.Equal(expected, color));
+            }
+        );
     }
 
     [Fact]
@@ -118,7 +118,8 @@ public class ExplodedViewRendererTests
             {
                 Assert.Equal(
                     view.Lines[firstLine + row][offset + column * TileStride],
-                    view.Faces[face][row][column].Letter());
+                    view.Faces[face][row][column].Letter()
+                );
             }
         }
     }

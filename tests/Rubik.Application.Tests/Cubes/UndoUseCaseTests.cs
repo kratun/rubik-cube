@@ -8,7 +8,8 @@ public class UndoUseCaseTests
 {
     private const string StaleRevision = "stale";
 
-    // DRY bent on purpose: the use case test classes share a shape only by coincidence, so each keeps its own small fixtures.
+    // DRY bent on purpose: the use case test classes share a shape only by coincidence, so each keeps its own small
+    // fixtures.
     private static readonly Move FrontTurn = new(Face.Front, Direction.Clockwise);
     private static readonly Move RightPrime = new(Face.Right, Direction.CounterClockwise);
 

@@ -23,15 +23,16 @@ public class CubeTests
     private const int UndefinedDirection = 99;
 
     // Hard-coded on purpose: independent of the production Face-to-normal and colour mappings.
-    public static TheoryData<Vector3, Color> SolvedFaces => new()
-    {
-        { new Vector3(0, 0, 1), Color.Green },
-        { new Vector3(1, 0, 0), Color.Red },
-        { new Vector3(0, 1, 0), Color.White },
-        { new Vector3(0, 0, -1), Color.Blue },
-        { new Vector3(-1, 0, 0), Color.Orange },
-        { new Vector3(0, -1, 0), Color.Yellow },
-    };
+    public static TheoryData<Vector3, Color> SolvedFaces =>
+        new()
+        {
+            { new Vector3(0, 0, 1), Color.Green },
+            { new Vector3(1, 0, 0), Color.Red },
+            { new Vector3(0, 1, 0), Color.White },
+            { new Vector3(0, 0, -1), Color.Blue },
+            { new Vector3(-1, 0, 0), Color.Orange },
+            { new Vector3(0, -1, 0), Color.Yellow },
+        };
 
     private static IEnumerable<Sticker> StickersFacing(Cube cube, Vector3 normal) =>
         cube.Cubies.SelectMany(c => c.Stickers).Where(s => s.Normal == normal);
@@ -65,55 +66,54 @@ public class CubeTests
 
     // Reference nets from an independent simulation (rows top to bottom), each the full 3x3 net of one face.
     // F, R and U list all six faces (as the acceptance criteria do); the other moves list the faces that change.
-    public static TheoryData<Move, Face, string[]> ReferenceNets => new()
-    {
-        { new Move(Face.Front, Direction.CounterClockwise), Face.Up, ["WWW", "WWW", "RRR"] },
-        { new Move(Face.Front, Direction.CounterClockwise), Face.Right, ["YRR", "YRR", "YRR"] },
-        { new Move(Face.Front, Direction.CounterClockwise), Face.Down, ["OOO", "YYY", "YYY"] },
-        { new Move(Face.Front, Direction.CounterClockwise), Face.Left, ["OOW", "OOW", "OOW"] },
-        { new Move(Face.Right, Direction.CounterClockwise), Face.Front, ["GGW", "GGW", "GGW"] },
-        { new Move(Face.Right, Direction.CounterClockwise), Face.Up, ["WWB", "WWB", "WWB"] },
-        { new Move(Face.Right, Direction.CounterClockwise), Face.Back, ["YBB", "YBB", "YBB"] },
-        { new Move(Face.Right, Direction.CounterClockwise), Face.Down, ["YYG", "YYG", "YYG"] },
-        { new Move(Face.Left, Direction.Clockwise), Face.Up, ["BWW", "BWW", "BWW"] },
-        { new Move(Face.Left, Direction.Clockwise), Face.Front, ["WGG", "WGG", "WGG"] },
-        { new Move(Face.Left, Direction.Clockwise), Face.Down, ["GYY", "GYY", "GYY"] },
-        { new Move(Face.Left, Direction.Clockwise), Face.Back, ["BBY", "BBY", "BBY"] },
-        { new Move(Face.Back, Direction.Clockwise), Face.Up, ["RRR", "WWW", "WWW"] },
-        { new Move(Face.Back, Direction.Clockwise), Face.Left, ["WOO", "WOO", "WOO"] },
-        { new Move(Face.Back, Direction.Clockwise), Face.Down, ["YYY", "YYY", "OOO"] },
-        { new Move(Face.Back, Direction.Clockwise), Face.Right, ["RRY", "RRY", "RRY"] },
-        { new Move(Face.Down, Direction.Clockwise), Face.Front, ["GGG", "GGG", "OOO"] },
-        { new Move(Face.Down, Direction.Clockwise), Face.Right, ["RRR", "RRR", "GGG"] },
-        { new Move(Face.Down, Direction.Clockwise), Face.Back, ["BBB", "BBB", "RRR"] },
-        { new Move(Face.Down, Direction.Clockwise), Face.Left, ["OOO", "OOO", "BBB"] },
-        { new Move(Face.Front, Direction.Clockwise), Face.Up, ["WWW", "WWW", "OOO"] },
-        { new Move(Face.Front, Direction.Clockwise), Face.Right, ["WRR", "WRR", "WRR"] },
-        { new Move(Face.Front, Direction.Clockwise), Face.Down, ["RRR", "YYY", "YYY"] },
-        { new Move(Face.Front, Direction.Clockwise), Face.Left, ["OOY", "OOY", "OOY"] },
-        { new Move(Face.Front, Direction.Clockwise), Face.Front, ["GGG", "GGG", "GGG"] },
-        { new Move(Face.Front, Direction.Clockwise), Face.Back, ["BBB", "BBB", "BBB"] },
-        { new Move(Face.Right, Direction.Clockwise), Face.Up, ["WWG", "WWG", "WWG"] },
-        { new Move(Face.Right, Direction.Clockwise), Face.Front, ["GGY", "GGY", "GGY"] },
-        { new Move(Face.Right, Direction.Clockwise), Face.Back, ["WBB", "WBB", "WBB"] },
-        { new Move(Face.Right, Direction.Clockwise), Face.Down, ["YYB", "YYB", "YYB"] },
-        { new Move(Face.Right, Direction.Clockwise), Face.Right, ["RRR", "RRR", "RRR"] },
-        { new Move(Face.Right, Direction.Clockwise), Face.Left, ["OOO", "OOO", "OOO"] },
-        { new Move(Face.Up, Direction.Clockwise), Face.Front, ["RRR", "GGG", "GGG"] },
-        { new Move(Face.Up, Direction.Clockwise), Face.Right, ["BBB", "RRR", "RRR"] },
-        { new Move(Face.Up, Direction.Clockwise), Face.Back, ["OOO", "BBB", "BBB"] },
-        { new Move(Face.Up, Direction.Clockwise), Face.Left, ["GGG", "OOO", "OOO"] },
-        { new Move(Face.Up, Direction.Clockwise), Face.Up, ["WWW", "WWW", "WWW"] },
-        { new Move(Face.Up, Direction.Clockwise), Face.Down, ["YYY", "YYY", "YYY"] },
-    };
+    public static TheoryData<Move, Face, string[]> ReferenceNets =>
+        new()
+        {
+            { new Move(Face.Front, Direction.CounterClockwise), Face.Up, ["WWW", "WWW", "RRR"] },
+            { new Move(Face.Front, Direction.CounterClockwise), Face.Right, ["YRR", "YRR", "YRR"] },
+            { new Move(Face.Front, Direction.CounterClockwise), Face.Down, ["OOO", "YYY", "YYY"] },
+            { new Move(Face.Front, Direction.CounterClockwise), Face.Left, ["OOW", "OOW", "OOW"] },
+            { new Move(Face.Right, Direction.CounterClockwise), Face.Front, ["GGW", "GGW", "GGW"] },
+            { new Move(Face.Right, Direction.CounterClockwise), Face.Up, ["WWB", "WWB", "WWB"] },
+            { new Move(Face.Right, Direction.CounterClockwise), Face.Back, ["YBB", "YBB", "YBB"] },
+            { new Move(Face.Right, Direction.CounterClockwise), Face.Down, ["YYG", "YYG", "YYG"] },
+            { new Move(Face.Left, Direction.Clockwise), Face.Up, ["BWW", "BWW", "BWW"] },
+            { new Move(Face.Left, Direction.Clockwise), Face.Front, ["WGG", "WGG", "WGG"] },
+            { new Move(Face.Left, Direction.Clockwise), Face.Down, ["GYY", "GYY", "GYY"] },
+            { new Move(Face.Left, Direction.Clockwise), Face.Back, ["BBY", "BBY", "BBY"] },
+            { new Move(Face.Back, Direction.Clockwise), Face.Up, ["RRR", "WWW", "WWW"] },
+            { new Move(Face.Back, Direction.Clockwise), Face.Left, ["WOO", "WOO", "WOO"] },
+            { new Move(Face.Back, Direction.Clockwise), Face.Down, ["YYY", "YYY", "OOO"] },
+            { new Move(Face.Back, Direction.Clockwise), Face.Right, ["RRY", "RRY", "RRY"] },
+            { new Move(Face.Down, Direction.Clockwise), Face.Front, ["GGG", "GGG", "OOO"] },
+            { new Move(Face.Down, Direction.Clockwise), Face.Right, ["RRR", "RRR", "GGG"] },
+            { new Move(Face.Down, Direction.Clockwise), Face.Back, ["BBB", "BBB", "RRR"] },
+            { new Move(Face.Down, Direction.Clockwise), Face.Left, ["OOO", "OOO", "BBB"] },
+            { new Move(Face.Front, Direction.Clockwise), Face.Up, ["WWW", "WWW", "OOO"] },
+            { new Move(Face.Front, Direction.Clockwise), Face.Right, ["WRR", "WRR", "WRR"] },
+            { new Move(Face.Front, Direction.Clockwise), Face.Down, ["RRR", "YYY", "YYY"] },
+            { new Move(Face.Front, Direction.Clockwise), Face.Left, ["OOY", "OOY", "OOY"] },
+            { new Move(Face.Front, Direction.Clockwise), Face.Front, ["GGG", "GGG", "GGG"] },
+            { new Move(Face.Front, Direction.Clockwise), Face.Back, ["BBB", "BBB", "BBB"] },
+            { new Move(Face.Right, Direction.Clockwise), Face.Up, ["WWG", "WWG", "WWG"] },
+            { new Move(Face.Right, Direction.Clockwise), Face.Front, ["GGY", "GGY", "GGY"] },
+            { new Move(Face.Right, Direction.Clockwise), Face.Back, ["WBB", "WBB", "WBB"] },
+            { new Move(Face.Right, Direction.Clockwise), Face.Down, ["YYB", "YYB", "YYB"] },
+            { new Move(Face.Right, Direction.Clockwise), Face.Right, ["RRR", "RRR", "RRR"] },
+            { new Move(Face.Right, Direction.Clockwise), Face.Left, ["OOO", "OOO", "OOO"] },
+            { new Move(Face.Up, Direction.Clockwise), Face.Front, ["RRR", "GGG", "GGG"] },
+            { new Move(Face.Up, Direction.Clockwise), Face.Right, ["BBB", "RRR", "RRR"] },
+            { new Move(Face.Up, Direction.Clockwise), Face.Back, ["OOO", "BBB", "BBB"] },
+            { new Move(Face.Up, Direction.Clockwise), Face.Left, ["GGG", "OOO", "OOO"] },
+            { new Move(Face.Up, Direction.Clockwise), Face.Up, ["WWW", "WWW", "WWW"] },
+            { new Move(Face.Up, Direction.Clockwise), Face.Down, ["YYY", "YYY", "YYY"] },
+        };
 
     private static Cube ApplyAll(Cube cube, IEnumerable<Move> moves) =>
         moves.Aggregate(cube, (current, move) => current.Apply(move));
 
     private static HashSet<(Vector3 Position, Vector3 Normal, Color Color)> Snapshot(Cube cube) =>
-        cube.Cubies
-            .SelectMany(cubie => cubie.Stickers.Select(s => (cubie.Position, s.Normal, s.Color)))
-            .ToHashSet();
+        cube.Cubies.SelectMany(cubie => cubie.Stickers.Select(s => (cubie.Position, s.Normal, s.Color))).ToHashSet();
 
     private static bool IsOppositeOf(Face candidate, Face face) => candidate.Normal() == -face.Normal();
 
@@ -134,12 +134,15 @@ public class CubeTests
 
         Assert.Equal(CubieCount, positions.Count);
         Assert.Equal(CubieCount, positions.Distinct().Count());
-        Assert.All(positions, p =>
-        {
-            Assert.InRange(p.X, MinCoordinate, MaxCoordinate);
-            Assert.InRange(p.Y, MinCoordinate, MaxCoordinate);
-            Assert.InRange(p.Z, MinCoordinate, MaxCoordinate);
-        });
+        Assert.All(
+            positions,
+            p =>
+            {
+                Assert.InRange(p.X, MinCoordinate, MaxCoordinate);
+                Assert.InRange(p.Y, MinCoordinate, MaxCoordinate);
+                Assert.InRange(p.Z, MinCoordinate, MaxCoordinate);
+            }
+        );
         Assert.DoesNotContain(Vector3.Zero, positions);
     }
 
@@ -150,13 +153,17 @@ public class CubeTests
         {
             var p = cubie.Position;
             var expected = new List<Vector3>();
-            if (p.X != MiddleLayer) expected.Add(new Vector3(p.X, MiddleLayer, MiddleLayer));
-            if (p.Y != MiddleLayer) expected.Add(new Vector3(MiddleLayer, p.Y, MiddleLayer));
-            if (p.Z != MiddleLayer) expected.Add(new Vector3(MiddleLayer, MiddleLayer, p.Z));
+            if (p.X != MiddleLayer)
+                expected.Add(new Vector3(p.X, MiddleLayer, MiddleLayer));
+            if (p.Y != MiddleLayer)
+                expected.Add(new Vector3(MiddleLayer, p.Y, MiddleLayer));
+            if (p.Z != MiddleLayer)
+                expected.Add(new Vector3(MiddleLayer, MiddleLayer, p.Z));
 
             Assert.Equal(
                 expected.OrderBy(v => v.ToString()),
-                cubie.Stickers.Select(s => s.Normal).OrderBy(v => v.ToString()));
+                cubie.Stickers.Select(s => s.Normal).OrderBy(v => v.ToString())
+            );
         }
     }
 
@@ -191,7 +198,8 @@ public class CubeTests
 
         Assert.All(
             before.Keys.Where(key => CubeNetTestHelper.IsCentre(key.Row, key.Column)),
-            key => Assert.Equal(before[key], after[key]));
+            key => Assert.Equal(before[key], after[key])
+        );
         Assert.Equal(AdjacentTileCount, changed.Count);
         Assert.DoesNotContain(changed, key => key.Face == face || IsOppositeOf(key.Face, face));
     }

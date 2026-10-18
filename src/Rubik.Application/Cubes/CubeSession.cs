@@ -2,7 +2,9 @@ using Rubik.Domain.Cubes;
 
 namespace Rubik.Application.Cubes;
 
-/// <summary>What is stored for a cube: its id and the moves applied so far. Everything else is derived (AD-4).</summary>
+/// <summary>
+/// What is stored for a cube: its id and the moves applied so far. Everything else is derived (AD-4).
+/// </summary>
 public sealed class CubeSession
 {
     public CubeSession(Guid cubeId, IEnumerable<Move> moves)

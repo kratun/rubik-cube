@@ -14,6 +14,7 @@ public static class CubeRevision
     private const string MoveSeparator = " ";
 
     public static string Of(IReadOnlyList<Move> moves) =>
-        Convert.ToHexStringLower(SHA256.HashData(
-            Encoding.UTF8.GetBytes(string.Join(MoveSeparator, moves.Select(move => move.ToNotation())))));
+        Convert.ToHexStringLower(
+            SHA256.HashData(Encoding.UTF8.GetBytes(string.Join(MoveSeparator, moves.Select(move => move.ToNotation()))))
+        );
 }

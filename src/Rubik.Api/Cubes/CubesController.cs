@@ -6,14 +6,17 @@ namespace Rubik.Api.Cubes;
 
 [ApiController]
 [Route(CubesRoute)]
-public class CubesController(CreateCubeUseCase createCube, GetCubeUseCase getCube, ApplyMovesUseCase applyMoves, UndoUseCase undo, ResetUseCase reset, ResultMapper resultMapper) : ControllerBase
+public class CubesController(ResultMapper resultMapper) : ControllerBase
 {
     public const string CubesRoute = "api/cubes";
 
     [HttpPost]
     [ProducesResponseType<CubeState>(StatusCodes.Status201Created)]
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<CreatedResult> Create(CancellationToken cancellationToken)
+    public async Task<CreatedResult> Create(
+        [FromServices] CreateCubeUseCase createCube,
+        CancellationToken cancellationToken
+    )
     {
         var state = await createCube.ExecuteAsync(cancellationToken);
         return Created($"/{CubesRoute}/{state.CubeId}", state);
@@ -25,7 +28,11 @@ public class CubesController(CreateCubeUseCase createCube, GetCubeUseCase getCub
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(
+        Guid id,
+        [FromServices] GetCubeUseCase getCube,
+        CancellationToken cancellationToken
+    )
     {
         var result = await getCube.ExecuteAsync(id, cancellationToken);
         return resultMapper.ToActionResult(result, HttpContext);
@@ -37,7 +44,12 @@ public class CubesController(CreateCubeUseCase createCube, GetCubeUseCase getCub
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ApplyMoves(Guid id, ApplyMovesRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> ApplyMoves(
+        Guid id,
+        ApplyMovesRequest request,
+        [FromServices] ApplyMovesUseCase applyMoves,
+        CancellationToken cancellationToken
+    )
     {
         var result = await applyMoves.ExecuteAsync(id, request.ExpectedRevision, request.Moves, cancellationToken);
         return resultMapper.ToActionResult(result, HttpContext);
@@ -49,7 +61,12 @@ public class CubesController(CreateCubeUseCase createCube, GetCubeUseCase getCub
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Undo(Guid id, ExpectedRevisionRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Undo(
+        Guid id,
+        ExpectedRevisionRequest request,
+        [FromServices] UndoUseCase undo,
+        CancellationToken cancellationToken
+    )
     {
         var result = await undo.ExecuteAsync(id, request.ExpectedRevision, cancellationToken);
         return resultMapper.ToActionResult(result, HttpContext);
@@ -61,7 +78,12 @@ public class CubesController(CreateCubeUseCase createCube, GetCubeUseCase getCub
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ErrorDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> Reset(Guid id, ExpectedRevisionRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Reset(
+        Guid id,
+        ExpectedRevisionRequest request,
+        [FromServices] ResetUseCase reset,
+        CancellationToken cancellationToken
+    )
     {
         var result = await reset.ExecuteAsync(id, request.ExpectedRevision, cancellationToken);
         return resultMapper.ToActionResult(result, HttpContext);

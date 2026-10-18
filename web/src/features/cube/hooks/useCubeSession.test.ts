@@ -25,6 +25,7 @@ import { TTC_CUBE } from "../fixtures/ttcCubeFixture";
 import { TTC_TEST_SEQUENCE } from "../utils/ttcSequence";
 import type { CubeState } from "../../../services/types";
 import { cubePagePath } from "../utils/sessionUrl";
+import { renderReadySession } from "../fixtures/readySessionFixture";
 import { CONFLICT_MESSAGE, CUBE_NOT_FOUND_MESSAGE, useCubeSession } from "./useCubeSession";
 
 const UNKNOWN_ID = "unknown";
@@ -153,20 +154,12 @@ describe("useCubeSession", () => {
   ] as const)("$name", ({ name, segment }) => {
     const URL = `${CUBES_PATH}/${SOLVED_CUBE_ID}/${segment}`;
 
-    async function readyMovedSession() {
-      const view = renderHook(() => useCubeSession(SOLVED_CUBE_ID));
-      await waitFor(() => {
-        expect(view.result.current.state.status).toBe("ready");
-      });
-      return view;
-    }
-
     it("posts the current revision and shows the response", async () => {
       const fetchMock = vi
         .spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
         .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
-      const { result } = await readyMovedSession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current[name]();
@@ -188,7 +181,7 @@ describe("useCubeSession", () => {
       vi.spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
         .mockResolvedValueOnce(errorResponse(STATUS_SERVER_ERROR, SERVER_ERROR_DETAIL));
-      const { result } = await readyMovedSession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current[name]();
@@ -208,7 +201,7 @@ describe("useCubeSession", () => {
         .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
         .mockResolvedValueOnce(errorResponse(STATUS_CONFLICT, SERVER_ERROR_DETAIL))
         .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
-      const { result } = await readyMovedSession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current[name]();
@@ -228,7 +221,7 @@ describe("useCubeSession", () => {
         .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
         .mockResolvedValueOnce(errorResponse(STATUS_CONFLICT, SERVER_ERROR_DETAIL))
         .mockResolvedValueOnce(errorResponse(STATUS_SERVER_ERROR, NOT_FOUND_DETAIL));
-      const { result } = await readyMovedSession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current[name]();
@@ -248,7 +241,7 @@ describe("useCubeSession", () => {
         .spyOn(globalThis, "fetch")
         .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
         .mockReturnValueOnce(new Promise(() => undefined));
-      const { result } = await readyMovedSession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current.applyMove("F");
@@ -263,14 +256,6 @@ describe("useCubeSession", () => {
     const TOKEN = "F";
     const SECOND_TOKEN = "R'";
     const MOVES_URL = `${CUBES_PATH}/${SOLVED_CUBE_ID}/${MOVES_SEGMENT}`;
-
-    async function readySession() {
-      const view = renderHook(() => useCubeSession(SOLVED_CUBE_ID));
-      await waitFor(() => {
-        expect(view.result.current.state.status).toBe("ready");
-      });
-      return view;
-    }
 
     it("does nothing before the cube is loaded", () => {
       const fetchMock = vi.spyOn(globalThis, "fetch").mockReturnValue(new Promise(() => undefined));
@@ -290,7 +275,7 @@ describe("useCubeSession", () => {
         .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
         .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
         .mockResolvedValueOnce(jsonResponse(secondCube));
-      const { result } = await readySession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current.applyMove(TOKEN);
@@ -325,7 +310,7 @@ describe("useCubeSession", () => {
             resolveMove = resolve;
           }),
         );
-      const { result } = await readySession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current.applyMove(TOKEN);
@@ -351,7 +336,7 @@ describe("useCubeSession", () => {
             resolveMove = resolve;
           }),
         );
-      const { result } = await readySession();
+      const { result } = await renderReadySession();
       expect(result.current.busy).toBe(false);
 
       act(() => {
@@ -376,7 +361,7 @@ describe("useCubeSession", () => {
         .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
         .mockResolvedValueOnce(failure)
         .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE));
-      const { result } = await readySession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current.applyMove(TOKEN);
@@ -394,7 +379,7 @@ describe("useCubeSession", () => {
         .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
         .mockResolvedValueOnce(jsonResponse(MOVED_CUBE))
         .mockResolvedValueOnce(jsonResponse(MOVED_CUBE));
-      const { result } = await readySession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current.applyMove(TOKEN);
@@ -414,7 +399,7 @@ describe("useCubeSession", () => {
         .mockResolvedValueOnce(jsonResponse(SOLVED_CUBE))
         .mockResolvedValueOnce(errorResponse(STATUS_CONFLICT, SERVER_ERROR_DETAIL))
         .mockResolvedValueOnce(errorResponse(STATUS_SERVER_ERROR, SERVER_ERROR_DETAIL));
-      const { result } = await readySession();
+      const { result } = await renderReadySession();
 
       act(() => {
         result.current.applyMove(TOKEN);
@@ -460,11 +445,7 @@ describe("useCubeSession", () => {
 
     async function readySession(cube: CubeState) {
       vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(cube));
-      const view = renderHook(() => useCubeSession(SOLVED_CUBE_ID));
-      await waitFor(() => {
-        expect(view.result.current.state.status).toBe("ready");
-      });
-      return view;
+      return renderReadySession();
     }
 
     it("resets a cube with moves, then applies the sequence on the revision the reset answered", async () => {

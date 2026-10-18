@@ -19,7 +19,8 @@ public sealed partial class ErrorReporter
     private const string TypeBaseUri = "https://httpstatuses.io/";
     private const string ActionOperationFormat = "{0}.{1}";
     private const string RequestOperationFormat = "{0} {1}";
-    private const string LogMessage = "Request failed. Operation={Operation} CubeId={CubeId} Status={Status} TraceId={TraceId}";
+    private const string LogMessage =
+        "Request failed. Operation={Operation} CubeId={CubeId} Status={Status} TraceId={TraceId}";
 
     private readonly ILogger<ErrorReporter> logger;
 
@@ -28,8 +29,16 @@ public sealed partial class ErrorReporter
         this.logger = logger;
     }
 
-    /// <summary>Logs the failure and returns the body to send. Pass <paramref name="exception"/> only for unexpected failures.</summary>
-    public ErrorDetails Report(HttpContext context, int status, string title, string detail, Exception? exception = null)
+    /// <summary>
+    /// Logs the failure and returns the body to send. Pass <paramref name="exception"/> only for unexpected failures.
+    /// </summary>
+    public ErrorDetails Report(
+        HttpContext context,
+        int status,
+        string title,
+        string detail,
+        Exception? exception = null
+    )
     {
         var traceId = context.TraceIdentifier;
         var operation = OperationOf(context);
@@ -64,7 +73,8 @@ public sealed partial class ErrorReporter
     private static Guid? CubeIdOf(HttpContext context)
     {
         var routeValues = context.Features.Get<IExceptionHandlerFeature>()?.RouteValues ?? context.Request.RouteValues;
-        return routeValues.TryGetValue(CubeIdRouteKey, out var value) && Guid.TryParse(value?.ToString(), out var cubeId)
+        return
+            routeValues.TryGetValue(CubeIdRouteKey, out var value) && Guid.TryParse(value?.ToString(), out var cubeId)
             ? cubeId
             : null;
     }

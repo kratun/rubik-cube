@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <ItemGroup>
     <ProjectReference Include="..\Rubik.Domain\Rubik.Domain.csproj" />
   </ItemGroup>
-
 </Project>

@@ -9,7 +9,8 @@ public class RevisionCheckedUpdateTests
     private const string StaleRevision = "stale";
     private const UpdateOutcome UnknownOutcome = (UpdateOutcome)(-1);
 
-    // DRY bent on purpose: see UndoUseCaseTests; the fixtures are tiny and the classes share a shape only by coincidence.
+    // DRY bent on purpose: see UndoUseCaseTests; the fixtures are tiny and the classes share a shape only by
+    // coincidence.
     private static readonly Move FrontTurn = new(Face.Front, Direction.Clockwise);
     private static readonly Move RightPrime = new(Face.Right, Direction.CounterClockwise);
 
@@ -31,7 +32,8 @@ public class RevisionCheckedUpdateTests
                 seen = current;
                 return current.Append(RightPrime);
             },
-            CancellationToken.None);
+            CancellationToken.None
+        );
 
         Assert.True(result.IsSuccess);
         Assert.Equal([FrontTurn], seen);
@@ -55,7 +57,8 @@ public class RevisionCheckedUpdateTests
                 builderRan = true;
                 return current;
             },
-            CancellationToken.None);
+            CancellationToken.None
+        );
 
         Assert.Equal(new RevisionConflict(session.CubeId), result.Error);
         Assert.False(builderRan);
@@ -79,7 +82,12 @@ public class RevisionCheckedUpdateTests
         var session = await CreateSessionAsync();
         repository.ForcedUpdateOutcome = UpdateOutcome.RevisionConflict;
 
-        var result = await Update.ExecuteAsync(session.CubeId, session.Revision, current => current, CancellationToken.None);
+        var result = await Update.ExecuteAsync(
+            session.CubeId,
+            session.Revision,
+            current => current,
+            CancellationToken.None
+        );
 
         Assert.Equal(new RevisionConflict(session.CubeId), result.Error);
     }
@@ -90,7 +98,12 @@ public class RevisionCheckedUpdateTests
         var session = await CreateSessionAsync();
         repository.ForcedUpdateOutcome = UpdateOutcome.NotFound;
 
-        var result = await Update.ExecuteAsync(session.CubeId, session.Revision, current => current, CancellationToken.None);
+        var result = await Update.ExecuteAsync(
+            session.CubeId,
+            session.Revision,
+            current => current,
+            CancellationToken.None
+        );
 
         Assert.Equal(new CubeNotFound(session.CubeId), result.Error);
     }
@@ -101,8 +114,9 @@ public class RevisionCheckedUpdateTests
         var session = await CreateSessionAsync();
         repository.ForcedUpdateOutcome = UnknownOutcome;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => Update.ExecuteAsync(session.CubeId, session.Revision, current => current, CancellationToken.None));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            Update.ExecuteAsync(session.CubeId, session.Revision, current => current, CancellationToken.None)
+        );
     }
 
     private async Task<CubeSession> CreateSessionAsync(params Move[] moves)

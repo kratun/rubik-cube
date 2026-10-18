@@ -18,13 +18,10 @@ public sealed class Result<T>
     public bool IsSuccess => error is null;
 
     /// <summary>The value of a successful result. Throws when the result is a failure.</summary>
-    public T Value => IsSuccess
-        ? value!
-        : throw new InvalidOperationException(NoValueMessage);
+    public T Value => IsSuccess ? value! : throw new InvalidOperationException(NoValueMessage);
 
     /// <summary>The error of a failed result. Throws when the result is a success.</summary>
-    public ApplicationError Error => error
-        ?? throw new InvalidOperationException(NoErrorMessage);
+    public ApplicationError Error => error ?? throw new InvalidOperationException(NoErrorMessage);
 
     public static Result<T> Success(T value) => new(value, error: null);
 

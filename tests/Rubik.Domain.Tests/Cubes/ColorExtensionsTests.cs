@@ -6,15 +6,16 @@ public class ColorExtensionsTests
 {
     private const int UndefinedColor = 99;
 
-    public static TheoryData<Color, char> ExpectedLetters => new()
-    {
-        { Color.White, 'W' },
-        { Color.Yellow, 'Y' },
-        { Color.Green, 'G' },
-        { Color.Blue, 'B' },
-        { Color.Red, 'R' },
-        { Color.Orange, 'O' },
-    };
+    public static TheoryData<Color, char> ExpectedLetters =>
+        new()
+        {
+            { Color.White, 'W' },
+            { Color.Yellow, 'Y' },
+            { Color.Green, 'G' },
+            { Color.Blue, 'B' },
+            { Color.Red, 'R' },
+            { Color.Orange, 'O' },
+        };
 
     [Theory]
     [MemberData(nameof(ExpectedLetters))]

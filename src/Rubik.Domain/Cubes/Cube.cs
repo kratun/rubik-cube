@@ -13,7 +13,9 @@ public sealed class Cube
     /// <summary>A corner cubie shows a sticker on three faces, the most any cubie has.</summary>
     private const int MaxStickersPerCubie = 3;
 
-    /// <summary>A cubie lies on a face when its position projected on the face normal reaches the outer layer.</summary>
+    /// <summary>
+    /// A cubie lies on a face when its position projected on the face normal reaches the outer layer.
+    /// </summary>
     private const int OuterLayerProjection = 1;
 
     private static readonly IReadOnlyDictionary<Face, Color> SolvedColors = new Dictionary<Face, Color>
@@ -52,7 +54,9 @@ public sealed class Cube
 
     public IReadOnlyList<Cubie> Cubies { get; }
 
-    /// <summary>Returns a new cube with the face layer of <paramref name="move"/> turned a quarter turn; this cube is unchanged.</summary>
+    /// <summary>
+    /// Returns a new cube with the face layer of <paramref name="move"/> turned a quarter turn; this cube is unchanged.
+    /// </summary>
     public Cube Apply(Move move)
     {
         var faceNormal = move.Face.Normal();
@@ -63,21 +67,22 @@ public sealed class Cube
             _ => throw new ArgumentOutOfRangeException(nameof(move), move.Direction, null),
         };
 
-        return new Cube(Cubies
-            .Select(cubie => IsInLayer(cubie, faceNormal) ? Rotate(cubie, axis) : cubie)
-            .ToList()
-            .AsReadOnly());
+        return new Cube(
+            Cubies.Select(cubie => IsInLayer(cubie, faceNormal) ? Rotate(cubie, axis) : cubie).ToList().AsReadOnly()
+        );
     }
 
     private static bool IsInLayer(Cubie cubie, Vector3 faceNormal) =>
         Vector3.Dot(cubie.Position, faceNormal) == OuterLayerProjection;
 
-    private static Cubie Rotate(Cubie cubie, Vector3 axis) => new(
-        cubie.Position.RotateClockwiseAbout(axis),
-        cubie.Stickers
-            .Select(sticker => sticker with { Normal = sticker.Normal.RotateClockwiseAbout(axis) })
-            .ToList()
-            .AsReadOnly());
+    private static Cubie Rotate(Cubie cubie, Vector3 axis) =>
+        new(
+            cubie.Position.RotateClockwiseAbout(axis),
+            cubie
+                .Stickers.Select(sticker => sticker with { Normal = sticker.Normal.RotateClockwiseAbout(axis) })
+                .ToList()
+                .AsReadOnly()
+        );
 
     private static IReadOnlyList<Sticker> SolvedStickersAt(Vector3 position)
     {

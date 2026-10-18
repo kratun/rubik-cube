@@ -18,11 +18,16 @@ internal static class TtcFixtureTestHelper
     public static IReadOnlyList<string> ExpectedLines => File.ReadAllLines(FixturePath(ExplodedViewFile));
 
     public static Cube Apply(Cube cube, string sequence) =>
-        sequence.Split(TokenSeparator, StringSplitOptions.RemoveEmptyEntries)
-            .Aggregate(cube, (current, token) =>
-                Move.TryParse(token, out var move)
-                    ? current.Apply(move)
-                    : throw new ArgumentException($"Not a move: {token}", nameof(sequence)));
+        sequence
+            .Split(TokenSeparator, StringSplitOptions.RemoveEmptyEntries)
+            .Aggregate(
+                cube,
+                (current, token) =>
+                    Move.TryParse(token, out var move)
+                        ? current.Apply(move)
+                        : throw new ArgumentException($"Not a move: {token}", nameof(sequence))
+            );
 
-    private static string FixturePath(string fileName) => Path.Combine(AppContext.BaseDirectory, FixtureFolder, fileName);
+    private static string FixturePath(string fileName) =>
+        Path.Combine(AppContext.BaseDirectory, FixtureFolder, fileName);
 }

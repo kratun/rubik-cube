@@ -1,41 +1,31 @@
 # Deferred work
 
-- source_spec: `_bmad-output/implementation-artifacts/spec-1-3-strict-move-parsing-part-of-fr2.md`
-  summary: `ArchitectureTests` checks project references only; a `PackageReference` added to `Rubik.Domain` would not fail a test.
-  evidence: `tests/Rubik.Api.Tests/Architecture/ProjectGraph.cs` reads `ProjectReference` edges only. Pre-existing from Story 1.1; 1.3 does not touch any csproj. Candidate for Story 4.2 (quality pass).
-
-- source_spec: `_bmad-output/implementation-artifacts/spec-2-2-read-a-cube-session-and-report-errors-fr5-nfr4.md`
-  summary: Requests that match no route (unknown path, wrong method such as 405, unsupported media type 415) return the framework's empty 4xx, not `ErrorDetails`, and are not logged by the Api.
-  evidence: The mapper and the exception handler only see requests that reach a controller. A `UseStatusCodePages` hook routing empty 4xx responses through `ErrorReporter` would close it; take it at the quality pass (Story 4.2), with tests for 404, 405 and 415; the new POST routes make 405 and 415 real.
-
-- source_spec: `_bmad-output/implementation-artifacts/spec-2-3-apply-moves-with-a-revision-check-fr6.md`
-  summary: Optional, decide at the quality pass (Story 4.2): switch `CubesController` from one constructor parameter per use case to `[FromServices]` parameters on each action, as a separate small change with no behaviour change.
-  evidence: The constructor takes the use cases plus `ResultMapper` and grows with every operation (Story 2.4 adds two). With `[FromServices]` the constructor stays at `ResultMapper` and each action declares only the use case it calls. A missing registration still fails loudly (500) and the integration tests do not change. Not needed for any story, so it waits unless the constructor becomes a nuisance.
-
-- source_spec: `_bmad-output/implementation-artifacts/spec-2-4-undo-and-reset-fr7.md`
-  summary: Adopt CSharpier at the quality pass (Story 4.2): add it as a local tool, format the whole C# code base once, and run `dotnet csharpier check .` as a check (and in CI, Story 5.3).
-  evidence: `.editorconfig` now sets `max_line_length = 120`, but nothing enforces it and about 86 lines in `src` and `tests` are longer (19 over 140), for example the `CubesController` constructor. `dotnet build` does not warn on line length, and `dotnet format` does not wrap lines. CSharpier puts each parameter on its own line with the closing parenthesis on a new line, which is the style written in `CLAUDE.md`. Do the formatting as its own change so the diff is mechanical.
-
 ## Deferred from: code review of spec-3-1-frontend-scaffold (2026-10-18)
 
 - No check that the committed `web/src/services/types/generated/schema.d.ts` matches the API. Regenerate with `npm run api:generate` (Development API on port 5080) and commit it with every contract change; deploy backend and frontend together. A CI step that runs the script and fails on a non-empty `git diff` closes it (AD-11, optional); take it with CI (Story 5.3).
 
-- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-frontend-scaffold-with-generated-api-types-and-a-typed-clien.md`
-  summary: Make `Program.cs` thinner at the quality pass (Story 4.2): move the service registrations and the Swagger setup into extension methods, for example `AddCubeServices`, `AddOpenApiDocument` and `UseDevelopmentTools`, in the Api project.
-  evidence: `Program.cs` now holds MVC and error-mapping setup, the OpenAPI filters (3.1 added three lines for them), nine use case and adapter registrations, the exception handler and the Development-only Swagger. Each new operation or filter adds lines to it. Extension methods keep it a short composition root and let each group be read on its own. Behaviour must not change; the integration tests and `ProgramTests` already cover the wiring. Optional, like the `[FromServices]` entry above; do both in the same pass if taken.
+## For Story 4.2b (WCAG 2.1 AA audit)
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-3-3-apply-moves-by-buttons-and-keyboard-fr9.md`
-  summary: Check the UI against WCAG 2.1 Level AA at the quality pass (Story 4.2) and fix what fails.
-  evidence: Stories 3.2 and 3.3 only cover the basics (real buttons, colour names on tiles, errors in `role="alert"`, queries by role). Not yet checked: colour contrast of text and tiles (1.4.3, 1.4.11), colours not being the only signal (1.4.1), visible focus (2.4.7), keyboard shortcuts that do not clash with assistive technology (2.1.4: single-character keys need a way to turn off or remap; today `F R U B L D` work on the whole page), status messages announced to screen readers (4.1.3), reflow and zoom to 200% (1.4.4, 1.4.10), target size, and an automated pass (axe or Lighthouse) plus a manual keyboard and screen reader run. `aria-keyshortcuts` on the move buttons was also suggested in the 3.3 review. Story 3.4 adds the history list and the Undo and Reset buttons: a successful move, undo or reset changes the history silently, so check 4.1.3 for those too (for example an aria-live region), and the focus move from Undo to Reset when the history empties.
+  summary: Check the UI against WCAG 2.1 Level AA in Story 4.2b and fix what fails (merged from the Story 3.3 and Story 3.6 review entries).
+  evidence: Stories 3.2 and 3.3 only cover the basics (real buttons, colour names on tiles, errors in `role="alert"`, queries by role). Not yet checked: colour contrast of text and tiles (1.4.3, 1.4.11), including while `aria-busy` dims the group to opacity 0.7 (text and focus ring); colours not being the only signal (1.4.1); visible focus (2.4.7); keyboard shortcuts that do not clash with assistive technology (2.1.4: single-character keys need a way to turn off or remap; today `F R U B L D` work on the whole page; `aria-keyshortcuts` on the move buttons was suggested in the 3.3 review); status messages announced to screen readers (4.1.3): the busy cue "Working…" is a plain span, and a successful move, undo or reset changes the history silently (for example an aria-live region); the focus move from Undo to Reset when the history empties; the Exploded view dialog (focus trap, Escape, focus return); reflow and zoom to 200% (1.4.4, 1.4.10); target size; an automated pass (axe or Lighthouse) plus a manual keyboard and screen reader run.
 
-## Deferred from: code review of refactor/web-folder-structure (2026-10-18)
-
-- The ESLint layer rules in `web/eslint.config.js` (`no-restricted-imports`) are only checked by `npm run lint`; no vitest case proves that a violation fails, and no CI job runs lint yet. Add a test that lints virtual files with the ESLint API (for example a component importing `services/client`, a util importing `react`, a hook importing a component, production code importing a fixture) at the quality pass (Story 4.2) or with CI (Story 5.3). Until then the rules were checked once by hand with temporary violating files.
+## For Story 3.7 (not yet written)
 
 - source_spec: none
-  summary: Idea from the owner (2026-10-18), not decided: add a textarea with an Apply button for typing a move sequence, and let the "Apply TTC test sequence" button put the TTC text into that textarea for testing.
-  evidence: Open choices: its own story (3.7) or part of 3.6; whether Apply appends to the current cube or resets first; whether the TTC button only fills the text or also applies it. Taking it changes the Story 3.5 acceptance criterion ("one click") and the e2e flow (an extra click). The API already validates tokens (400), so the frontend would only split the text on whitespace.
+  summary: Idea from the owner (2026-10-18), decided to become Story 3.7: add a textarea with an Apply button for typing a move sequence, and let the "Apply TTC test sequence" button put the TTC text into that textarea for testing.
+  evidence: Open choices for the story: whether Apply appends to the current cube or resets first; whether the TTC button only fills the text or also applies it. Taking it changes the Story 3.5 acceptance criterion ("one click") and the e2e flow (an extra click). The API already validates tokens (400), so the frontend would only split the text on whitespace.
 
-## Deferred from: code review of spec-3-6-ui-polish-fr8-to-fr11 (2026-10-18)
+## For the quality pass follow-up
 
-- Add to the WCAG 2.1 AA pass (Story 4.2): the busy cue "Working…" is a plain span, so a screen reader is not told when a change starts or ends (4.1.3); `aria-busy` dims the group to opacity 0.7, so the contrast of text and focus ring while busy needs measuring (1.4.3, 1.4.11).
+- source_spec: `_bmad-output/implementation-artifacts/spec-4-2a-quality-pass-and-cleanup-nfr3-nfr5.md`
+  summary: Add `dotnet tool restore` to the CLAUDE.md line about CSharpier and to the README prerequisites (Story 4.1).
+  evidence: CSharpier is a local tool; on a fresh clone `dotnet csharpier check .` fails until `dotnet tool restore` has run. The fix edits CLAUDE.md, so the review deferred it.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-4-2a-quality-pass-and-cleanup-nfr3-nfr5.md`
+  summary: Mirror the 4.2a structure in the architecture spine: the `Extensions/` extension methods, `StatusCodeErrorWriter` for empty 4xx and 5xx responses, and `SuppressMapClientErrors`.
+  evidence: The code review of 4.2a noted that the spine does not mention them; the spine is a planning artifact outside the story's scope.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-4-2a-quality-pass-and-cleanup-nfr3-nfr5.md`
+  summary: No test checks that the tile colours are painted (a misspelt `--colour-tile-*` name would give transparent tiles).
+  evidence: Component tests run in jsdom without the stylesheet. One Playwright computed-style check on a tile would close it; the WCAG contrast work in 4.2b can include it.

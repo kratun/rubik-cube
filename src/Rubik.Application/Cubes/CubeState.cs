@@ -3,7 +3,8 @@ using Rubik.Domain.Cubes;
 namespace Rubik.Application.Cubes;
 
 /// <summary>
-/// A cube session as clients see it (AD-7), rebuilt from the stored moves (AD-4); the revision is derived from them too.
+/// A cube session as clients see it (AD-7), rebuilt from the stored moves (AD-4); the revision is derived from them
+/// too.
 /// It holds no Domain types, so Api can return it as is (AD-1): moves are notation tokens, face keys are lower case,
 /// colours are their names.
 /// </summary>
@@ -12,7 +13,8 @@ public sealed record CubeState(
     string Revision,
     IReadOnlyList<string> Moves,
     IReadOnlyDictionary<string, IReadOnlyList<IReadOnlyList<string>>> Faces,
-    IReadOnlyList<string> ExplodedView)
+    IReadOnlyList<string> ExplodedView
+)
 {
     /// <summary>Replays the session's moves on a solved cube and renders the result.</summary>
     public static CubeState From(CubeSession session)
@@ -26,9 +28,13 @@ public sealed record CubeState(
             session.Moves.Select(move => move.ToNotation()).ToList(),
             view.Faces.ToDictionary(
                 face => face.Key.ToString().ToLowerInvariant(),
-                face => (IReadOnlyList<IReadOnlyList<string>>)face.Value
-                    .Select(row => (IReadOnlyList<string>)row.Select(color => color.ToString()).ToList())
-                    .ToList()),
-            view.Lines);
+                face =>
+                    (IReadOnlyList<IReadOnlyList<string>>)
+                        face
+                            .Value.Select(row => (IReadOnlyList<string>)row.Select(color => color.ToString()).ToList())
+                            .ToList()
+            ),
+            view.Lines
+        );
     }
 }

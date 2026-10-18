@@ -18,13 +18,14 @@ public class RequiredPropertiesSchemaFilterTests(WebApplicationFactory<Program> 
     private const string MandatoryName = "mandatory";
     private const string OptionalName = "optional";
 
-    public static TheoryData<string, string[]> RequiredByDto => new()
-    {
-        { CubeStateSchema, ["cubeId", "revision", "moves", "faces", "explodedView"] },
-        { ErrorDetailsSchema, ["type", "title", "status", "detail", "traceId"] },
-        { ExpectedRevisionRequestSchema, ["expectedRevision"] },
-        { ApplyMovesRequestSchema, ["expectedRevision", "moves"] },
-    };
+    public static TheoryData<string, string[]> RequiredByDto =>
+        new()
+        {
+            { CubeStateSchema, ["cubeId", "revision", "moves", "faces", "explodedView"] },
+            { ErrorDetailsSchema, ["type", "title", "status", "detail", "traceId"] },
+            { ExpectedRevisionRequestSchema, ["expectedRevision"] },
+            { ApplyMovesRequestSchema, ["expectedRevision", "moves"] },
+        };
 
     [Theory]
     [MemberData(nameof(RequiredByDto))]
@@ -32,7 +33,9 @@ public class RequiredPropertiesSchemaFilterTests(WebApplicationFactory<Program> 
     {
         using var document = await OpenApiDocumentTestHelper.FetchAsync(factory);
 
-        var schema = document.RootElement.GetProperty(SchemasProperty).GetProperty(SchemasSection)
+        var schema = document
+            .RootElement.GetProperty(SchemasProperty)
+            .GetProperty(SchemasSection)
             .GetProperty(schemaName);
         var required = schema.GetProperty(RequiredProperty).EnumerateArray().Select(item => item.GetString()).ToList();
 
@@ -44,7 +47,8 @@ public class RequiredPropertiesSchemaFilterTests(WebApplicationFactory<Program> 
     {
         var schema = SchemaWith(
             (MandatoryName, JsonSchemaType.String),
-            (OptionalName, JsonSchemaType.String | JsonSchemaType.Null));
+            (OptionalName, JsonSchemaType.String | JsonSchemaType.Null)
+        );
 
         new RequiredPropertiesSchemaFilter().Apply(schema, null!);
 
@@ -67,6 +71,7 @@ public class RequiredPropertiesSchemaFilterTests(WebApplicationFactory<Program> 
             Type = JsonSchemaType.Object,
             Properties = properties.ToDictionary(
                 property => property.Name,
-                property => (IOpenApiSchema)new OpenApiSchema { Type = property.Type }),
+                property => (IOpenApiSchema)new OpenApiSchema { Type = property.Type }
+            ),
         };
 }

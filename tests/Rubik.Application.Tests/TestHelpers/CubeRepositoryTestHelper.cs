@@ -30,7 +30,11 @@ internal sealed class CubeRepositoryTestHelper : ICubeRepository
     public Task<CubeSession?> GetAsync(Guid cubeId, CancellationToken cancellationToken) =>
         Task.FromResult(created.SingleOrDefault(session => session.CubeId == cubeId));
 
-    public Task<UpdateOutcome> TryUpdateAsync(string expectedRevision, CubeSession replacement, CancellationToken cancellationToken)
+    public Task<UpdateOutcome> TryUpdateAsync(
+        string expectedRevision,
+        CubeSession replacement,
+        CancellationToken cancellationToken
+    )
     {
         updates.Add(new UpdateRequest(expectedRevision, replacement));
 

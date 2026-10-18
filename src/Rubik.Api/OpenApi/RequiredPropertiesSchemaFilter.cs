@@ -16,8 +16,8 @@ public sealed class RequiredPropertiesSchemaFilter : ISchemaFilter
             return;
         }
 
-        var nonNullable = concrete.Properties
-            .Where(property => !(property.Value.Type?.HasFlag(JsonSchemaType.Null) ?? false))
+        var nonNullable = concrete
+            .Properties.Where(property => !(property.Value.Type?.HasFlag(JsonSchemaType.Null) ?? false))
             .Select(property => property.Key)
             .ToList();
 
