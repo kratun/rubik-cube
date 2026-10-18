@@ -2,7 +2,7 @@
 title: 'Story 3.2: Show the cube and keep the session in the URL (FR8)'
 type: 'feature'
 created: '2026-10-18'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 baseline_commit: '4e973ee7f5121f444b9e27083f0104d3621b4528'
 review_loop_iteration: 0
