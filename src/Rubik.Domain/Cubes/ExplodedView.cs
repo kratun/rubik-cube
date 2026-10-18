@@ -6,4 +6,5 @@ namespace Rubik.Domain.Cubes;
 /// </summary>
 public sealed record ExplodedView(
     IReadOnlyDictionary<Face, IReadOnlyList<IReadOnlyList<Color>>> Faces,
-    IReadOnlyList<string> Lines);
+    IReadOnlyList<string> Lines
+);

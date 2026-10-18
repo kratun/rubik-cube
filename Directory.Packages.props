@@ -1,5 +1,4 @@
 <Project>
-
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
@@ -10,5 +9,4 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.3.0" />
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
   </ItemGroup>
-
 </Project>

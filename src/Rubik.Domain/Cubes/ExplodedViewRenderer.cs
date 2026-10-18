@@ -24,16 +24,18 @@ public static class ExplodedViewRenderer
 
     // For each face: the direction of increasing column and increasing row when the face is viewed from outside,
     // with Up on top and Front below it.
-    private static readonly IReadOnlyDictionary<Face, (Vector3 Column, Vector3 Row)> Orientations =
-        new Dictionary<Face, (Vector3, Vector3)>
-        {
-            [Face.Front] = (Vector3.UnitX, -Vector3.UnitY),
-            [Face.Right] = (-Vector3.UnitZ, -Vector3.UnitY),
-            [Face.Back] = (-Vector3.UnitX, -Vector3.UnitY),
-            [Face.Left] = (Vector3.UnitZ, -Vector3.UnitY),
-            [Face.Up] = (Vector3.UnitX, Vector3.UnitZ),
-            [Face.Down] = (Vector3.UnitX, -Vector3.UnitZ),
-        };
+    private static readonly IReadOnlyDictionary<Face, (Vector3 Column, Vector3 Row)> Orientations = new Dictionary<
+        Face,
+        (Vector3, Vector3)
+    >
+    {
+        [Face.Front] = (Vector3.UnitX, -Vector3.UnitY),
+        [Face.Right] = (-Vector3.UnitZ, -Vector3.UnitY),
+        [Face.Back] = (-Vector3.UnitX, -Vector3.UnitY),
+        [Face.Left] = (Vector3.UnitZ, -Vector3.UnitY),
+        [Face.Up] = (Vector3.UnitX, Vector3.UnitZ),
+        [Face.Down] = (Vector3.UnitX, -Vector3.UnitZ),
+    };
 
     public static ExplodedView Render(Cube cube)
     {
@@ -47,23 +49,26 @@ public static class ExplodedViewRenderer
                 var (column, row) = Orientations[face];
                 faces[face][
                     Vector3.Dot(cubie.Position, row) + CentreIndex,
-                    Vector3.Dot(cubie.Position, column) + CentreIndex] = sticker.Color;
+                    Vector3.Dot(cubie.Position, column) + CentreIndex
+                ] = sticker.Color;
             }
         }
 
         var grids = new ReadOnlyDictionary<Face, IReadOnlyList<IReadOnlyList<Color>>>(
-            faces.ToDictionary(pair => pair.Key, pair => ToGrid(pair.Value)));
+            faces.ToDictionary(pair => pair.Key, pair => ToGrid(pair.Value))
+        );
         return new ExplodedView(grids, ToLines(grids));
     }
 
     private static Face FaceOf(Vector3 normal) => Enum.GetValues<Face>().Single(face => face.Normal() == normal);
 
     private static IReadOnlyList<IReadOnlyList<Color>> ToGrid(Color[,] tiles) =>
-        Enumerable.Range(0, GridSize)
-            .Select(row => (IReadOnlyList<Color>)Enumerable.Range(0, GridSize)
-                .Select(column => tiles[row, column])
-                .ToList()
-                .AsReadOnly())
+        Enumerable
+            .Range(0, GridSize)
+            .Select(row =>
+                (IReadOnlyList<Color>)
+                    Enumerable.Range(0, GridSize).Select(column => tiles[row, column]).ToList().AsReadOnly()
+            )
             .ToList()
             .AsReadOnly();
 
@@ -71,8 +76,11 @@ public static class ExplodedViewRenderer
     {
         var lines = new List<string>();
         lines.AddRange(Enumerable.Range(0, GridSize).Select(row => FaceIndent + RowText(grids[Face.Up], row)));
-        lines.AddRange(Enumerable.Range(0, GridSize).Select(row =>
-            string.Join(TileSeparator, MiddleBand.Select(face => RowText(grids[face], row)))));
+        lines.AddRange(
+            Enumerable
+                .Range(0, GridSize)
+                .Select(row => string.Join(TileSeparator, MiddleBand.Select(face => RowText(grids[face], row))))
+        );
         lines.AddRange(Enumerable.Range(0, GridSize).Select(row => FaceIndent + RowText(grids[Face.Down], row)));
         return lines.AsReadOnly();
     }

@@ -54,7 +54,6 @@ public class CubeRevisionTests
     {
         var before = CubeRevision.Of([Front, Right]);
 
-
         var moves = new List<Move> { Front, Right, Up };
         moves.RemoveAt(moves.Count - 1);
         var afterUndo = CubeRevision.Of(moves);

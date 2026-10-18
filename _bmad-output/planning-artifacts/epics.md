@@ -140,7 +140,7 @@ So that the cube and the TTC result are the first thing I see and I can tell wha
 **When** I run `npm run lint`, `npm run test`, `npm run build` and `npm run e2e`
 **Then** everything passes: existing component tests are updated for the new markup, queries stay by role, and no cube logic or API shape changes.
 
-Out of scope: the WCAG 2.1 AA audit (contrast ratios, screen-reader status announcements, axe or Lighthouse pass, shortcut remapping) stays with Story 4.2; the 3D view is Story 5.1.
+Out of scope: the WCAG 2.1 AA audit (contrast ratios, screen-reader status announcements, axe or Lighthouse pass, shortcut remapping) stays with Story 4.2b; the 3D view is Story 5.1.
 
 ## Epic 4: Reviewer-ready delivery
 README with exact prerequisites and expected output, architecture note, fresh-clone verification, GitHub publishing and cleanup.
@@ -593,7 +593,7 @@ So that I get a running app in under ten minutes.
 **Then** it contains or links the architecture note (`docs/ARCHITECTURE.md`) with the diagram and rationale
 **And** it states that sessions live in memory and are lost on restart.
 
-### Story 4.2: Quality pass and cleanup (NFR3, NFR5)
+### Story 4.2a: Quality pass and cleanup (NFR3, NFR5)
 
 As a reviewer,
 I want a clean, warning-free repository,
@@ -617,6 +617,19 @@ So that it looks like production-quality work.
 **Given** the planning material (`_bmad/`, `_bmad-output/`, `.claude/`, `CLAUDE.md`, `docs/` sources)
 **When** I prepare the submission
 **Then** the owner decides which to keep, and `.gitignore` and the final tree reflect that decision.
+
+### Story 4.2b: WCAG 2.1 AA audit (NFR5)
+
+As a reviewer,
+I want the UI checked against WCAG 2.1 Level AA,
+So that it is usable with a keyboard, a screen reader and at low contrast.
+
+**Acceptance Criteria:**
+
+**Given** the running UI
+**When** I run an automated pass (axe or Lighthouse) and a manual check
+**Then** contrast of text and tiles (1.4.3, 1.4.11, also while busy), single-key shortcuts (2.1.4), status messages such as the busy cue "Working…" and history changes (4.1.3), and focus and Escape in the Exploded view dialog are checked
+**And** every failure is fixed with a test, and anything not fixed is recorded in `deferred-work.md`.
 
 ### Story 4.3: Publish to GitHub (NFR6)
 

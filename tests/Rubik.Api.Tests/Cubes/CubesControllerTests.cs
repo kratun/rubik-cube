@@ -1,11 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
@@ -13,18 +10,18 @@ using Rubik.Api.Errors;
 using Rubik.Api.Tests.TestHelpers;
 using Rubik.Application.Cubes;
 using Rubik.Domain.Cubes;
+using static Rubik.Api.Tests.TestHelpers.CubesApiTestHelper;
+using static Rubik.Api.Tests.TestHelpers.FailureLogTestHelper;
 
 namespace Rubik.Api.Tests.Cubes;
 
-public class CubesControllerTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class CubesControllerTests(WebApplicationFactory<Program> factory)
+    : IClassFixture<WebApplicationFactory<Program>>
 {
-    private const string CubesPath = "/api/cubes";
     private const string StatusProperty = "status";
-    private const string RevisionProperty = "revision";
     private const string MovesProperty = "moves";
     private const string ExplodedViewProperty = "explodedView";
     private const string DetailProperty = "detail";
-    private const string CubeIdProperty = "cubeId";
     private const string TraceIdProperty = "traceId";
     private const string NewCubeRevision = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
     private const int NoMoves = 0;
@@ -41,7 +38,6 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     private const string FrontToken = "F";
     private const string RightPrimeToken = "R'";
     private const string StaleRevision = "stale";
-    private const string MoveSeparator = " ";
     private const string JsonContentType = "application/json";
 
     private static readonly Move FrontTurn = new(Face.Front, Direction.Clockwise);
@@ -96,7 +92,10 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
         Assert.NotEqual(Guid.Empty, root.GetProperty(CubeIdProperty).GetGuid());
         Assert.Equal(NewCubeRevision, root.GetProperty(RevisionProperty).GetString());
         Assert.Equal(NoMoves, root.GetProperty(MovesProperty).GetArrayLength());
-        Assert.Equal(SolvedLines, root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString()));
+        Assert.Equal(
+            SolvedLines,
+            root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString())
+        );
 
         var faces = root.GetProperty("faces");
         Assert.Equal(SolvedColours.Count, faces.EnumerateObject().Count());
@@ -104,15 +103,22 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
         {
             var grid = faces.GetProperty(face).EnumerateArray().ToList();
             Assert.Equal(GridSize, grid.Count);
-            Assert.All(grid, row => Assert.Equal(Enumerable.Repeat(colour, GridSize), row.EnumerateArray().Select(tile => tile.GetString())));
+            Assert.All(
+                grid,
+                row =>
+                    Assert.Equal(
+                        Enumerable.Repeat(colour, GridSize),
+                        row.EnumerateArray().Select(tile => tile.GetString())
+                    )
+            );
         }
     }
 
     [Fact]
     public async Task Post_CalledTwice_ReturnsDifferentIdsAndStoresIndependentSessions()
     {
-        var first = await CreateAsync();
-        var second = await CreateAsync();
+        var first = await CreateAsync(client);
+        var second = await CreateAsync(client);
 
         Assert.NotEqual(first, second);
         var repository = factory.Services.GetRequiredService<ICubeRepository>();
@@ -137,7 +143,7 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task Get_UnknownId_Returns404WithErrorDetailsAndOneWarningWithTheSameTraceId()
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
         var unknownId = Guid.NewGuid();
 
         var response = await testClient.GetAsync($"{CubesPath}/{unknownId}", TestContext.Current.CancellationToken);
@@ -158,7 +164,7 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task Get_MalformedId_Returns400WithErrorDetailsAndNoCubeIdInTheLog()
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
 
         var response = await testClient.GetAsync($"{CubesPath}/{MalformedId}", TestContext.Current.CancellationToken);
 
@@ -175,7 +181,9 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task Get_RepositoryThrows_Returns500WithoutStackTraceAndOneErrorWithTheException()
     {
-        var (testClient, logs) = CreateLoggingClient(services => services.AddSingleton<ICubeRepository, ThrowingCubeRepositoryTestHelper>());
+        var (testClient, logs) = factory.CreateLoggingClient(services =>
+            services.AddSingleton<ICubeRepository, ThrowingCubeRepositoryTestHelper>()
+        );
 
         var cubeId = Guid.NewGuid();
         var response = await testClient.GetAsync($"{CubesPath}/{cubeId}", TestContext.Current.CancellationToken);
@@ -186,7 +194,9 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task Post_RepositoryThrows_Returns500WithoutStackTraceAndOneErrorWithTheException()
     {
-        var (testClient, logs) = CreateLoggingClient(services => services.AddSingleton<ICubeRepository, ThrowingCubeRepositoryTestHelper>());
+        var (testClient, logs) = factory.CreateLoggingClient(services =>
+            services.AddSingleton<ICubeRepository, ThrowingCubeRepositoryTestHelper>()
+        );
 
         var response = await testClient.PostAsync(CubesPath, content: null, TestContext.Current.CancellationToken);
 
@@ -196,7 +206,7 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task PostMoves_TtcSequenceOnNewCube_Returns200WithTheFixtureViewAndTheSequenceRevision()
     {
-        var created = await CreateStateAsync();
+        var created = await CreateStateAsync(client);
         var tokens = TtcFixtureTestHelper.Tokens;
 
         var response = await PostMovesAsync(client, created.CubeId, created.Revision, tokens);
@@ -205,13 +215,16 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
         var root = (await ReadBodyAsync(response)).RootElement;
         Assert.Equal(RevisionOf(tokens), root.GetProperty(RevisionProperty).GetString());
         Assert.Equal(tokens, root.GetProperty(MovesProperty).EnumerateArray().Select(move => move.GetString()));
-        Assert.Equal(TtcFixtureTestHelper.ExpectedLines, root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString()));
+        Assert.Equal(
+            TtcFixtureTestHelper.ExpectedLines,
+            root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString())
+        );
     }
 
     [Fact]
     public async Task PostMoves_AfterOk_TheStoredSessionHoldsTheMoves()
     {
-        var created = await CreateStateAsync();
+        var created = await CreateStateAsync(client);
         var posted = await PostMovesAsync(client, created.CubeId, created.Revision, [FrontToken]);
         Assert.Equal(HttpStatusCode.OK, posted.StatusCode);
 
@@ -224,7 +237,7 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task PostMoves_StaleRevision_Returns409WithOneWarningAndLeavesTheSessionUnchanged()
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
         var created = await CreateStateAsync(testClient);
 
         var response = await PostMovesAsync(testClient, created.CubeId, StaleRevision, [FrontToken]);
@@ -245,11 +258,15 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task PostMoves_SameMoveCountButOtherHistory_Returns409AndLeavesTheSessionUnchanged()
     {
-        var created = await CreateStateAsync();
+        var created = await CreateStateAsync(client);
         var repository = factory.Services.GetRequiredService<ICubeRepository>();
         var seenByClient = new[] { FrontTurn, RightTurn, UpTurn, BackTurn };
         var currentSession = new[] { FrontTurn, RightTurn, LeftTurn, DownTurn };
-        await repository.TryUpdateAsync(created.Revision, new CubeSession(created.CubeId, currentSession), CancellationToken.None);
+        await repository.TryUpdateAsync(
+            created.Revision,
+            new CubeSession(created.CubeId, currentSession),
+            CancellationToken.None
+        );
         var currentRevision = CubeRevision.Of(currentSession);
 
         var response = await PostMovesAsync(client, created.CubeId, CubeRevision.Of(seenByClient), [FrontToken]);
@@ -261,23 +278,26 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task PostMoves_TwoParallelRequestsWithTheSameRevision_ExactlyOneSucceedsAndTheOtherConflicts()
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
         var created = await CreateStateAsync(testClient);
         var gate = new TaskCompletionSource();
 
         var requests = new[] { FrontToken, RightPrimeToken }
-            .Select(token => Task.Run(async () =>
-            {
-                await gate.Task;
-                return await PostMovesAsync(testClient, created.CubeId, created.Revision, [token]);
-            }))
+            .Select(token =>
+                Task.Run(async () =>
+                {
+                    await gate.Task;
+                    return await PostMovesAsync(testClient, created.CubeId, created.Revision, [token]);
+                })
+            )
             .ToList();
         gate.SetResult();
         var responses = await Task.WhenAll(requests);
 
         Assert.Equal(
             [HttpStatusCode.OK, HttpStatusCode.Conflict],
-            responses.Select(response => response.StatusCode).Order());
+            responses.Select(response => response.StatusCode).Order()
+        );
         var winner = responses.Single(response => response.StatusCode == HttpStatusCode.OK);
         var winnerRoot = (await ReadBodyAsync(winner)).RootElement;
         await AssertRevisionAsync(testClient, created.CubeId, winnerRoot.GetProperty(RevisionProperty).GetString()!);
@@ -290,7 +310,7 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [InlineData("F2")]
     public async Task PostMoves_InvalidToken_Returns400NamingItWithOneWarningAndLeavesTheSessionUnchanged(string token)
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
         var created = await CreateStateAsync(testClient);
 
         var response = await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken, token]);
@@ -313,16 +333,20 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [InlineData("{\"expectedRevision\":\"r\",\"moves\":[\"F\",null]}")]
     public async Task PostMoves_MissingOrEmptyInput_Returns400WithOneWarningAndLeavesTheSessionUnchanged(string body)
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
         var created = await CreateStateAsync(testClient);
 
         var response = await testClient.PostAsync(
             $"{CubesPath}/{created.CubeId}/moves",
             new StringContent(body, Encoding.UTF8, JsonContentType),
-            TestContext.Current.CancellationToken);
+            TestContext.Current.CancellationToken
+        );
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal((int)HttpStatusCode.BadRequest, (await ReadBodyAsync(response)).RootElement.GetProperty(StatusProperty).GetInt32());
+        Assert.Equal(
+            (int)HttpStatusCode.BadRequest,
+            (await ReadBodyAsync(response)).RootElement.GetProperty(StatusProperty).GetInt32()
+        );
         Assert.Equal(LogLevel.Warning, SingleFailure(logs).Level);
         await AssertRevisionAsync(testClient, created.CubeId, created.Revision);
     }
@@ -330,12 +354,13 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task PostMoves_MalformedId_Returns400WithOneWarning()
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
 
         var response = await testClient.PostAsJsonAsync(
             $"{CubesPath}/{MalformedId}/moves",
             new { expectedRevision = StaleRevision, moves = new[] { FrontToken } },
-            TestContext.Current.CancellationToken);
+            TestContext.Current.CancellationToken
+        );
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal(LogLevel.Warning, SingleFailure(logs).Level);
@@ -352,7 +377,9 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task PostMoves_RepositoryThrows_Returns500WithoutStackTraceAndOneErrorWithTheException()
     {
-        var (testClient, logs) = CreateLoggingClient(services => services.AddSingleton<ICubeRepository, ThrowingCubeRepositoryTestHelper>());
+        var (testClient, logs) = factory.CreateLoggingClient(services =>
+            services.AddSingleton<ICubeRepository, ThrowingCubeRepositoryTestHelper>()
+        );
 
         var cubeId = Guid.NewGuid();
         var response = await PostMovesAsync(testClient, cubeId, StaleRevision, [FrontToken]);
@@ -363,8 +390,10 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task PostUndo_AfterMoves_Returns200WithTheLastMoveRemovedAndTheShortenedRevision()
     {
-        var created = await CreateStateAsync();
-        var applied = await ReadStateAsync(await PostMovesAsync(client, created.CubeId, created.Revision, [FrontToken, RightPrimeToken]));
+        var created = await CreateStateAsync(client);
+        var applied = await ReadStateAsync(
+            await PostMovesAsync(client, created.CubeId, created.Revision, [FrontToken, RightPrimeToken])
+        );
 
         var response = await PostExpectedRevisionAsync(client, created.CubeId, UndoAction, applied.Revision);
 
@@ -378,8 +407,10 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Fact]
     public async Task PostReset_AfterTtcSequence_Returns200WithNoMovesTheEmptyRevisionAndTheSolvedState()
     {
-        var created = await CreateStateAsync();
-        var applied = await ReadStateAsync(await PostMovesAsync(client, created.CubeId, created.Revision, TtcFixtureTestHelper.Tokens));
+        var created = await CreateStateAsync(client);
+        var applied = await ReadStateAsync(
+            await PostMovesAsync(client, created.CubeId, created.Revision, TtcFixtureTestHelper.Tokens)
+        );
 
         var response = await PostExpectedRevisionAsync(client, created.CubeId, ResetAction, applied.Revision);
 
@@ -387,7 +418,10 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
         var root = (await ReadBodyAsync(response)).RootElement;
         Assert.Equal(NewCubeRevision, root.GetProperty(RevisionProperty).GetString());
         Assert.Equal(NoMoves, root.GetProperty(MovesProperty).GetArrayLength());
-        Assert.Equal(SolvedLines, root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString()));
+        Assert.Equal(
+            SolvedLines,
+            root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString())
+        );
         await AssertRevisionAsync(client, created.CubeId, NewCubeRevision);
     }
 
@@ -396,7 +430,7 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [InlineData(ResetAction)]
     public async Task PostUndoOrReset_EmptySession_Returns200WithTheSolvedStateAndTheSameRevision(string action)
     {
-        var created = await CreateStateAsync();
+        var created = await CreateStateAsync(client);
 
         var response = await PostExpectedRevisionAsync(client, created.CubeId, action, created.Revision);
 
@@ -404,17 +438,25 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
         var root = (await ReadBodyAsync(response)).RootElement;
         Assert.Equal(created.Revision, root.GetProperty(RevisionProperty).GetString());
         Assert.Equal(NoMoves, root.GetProperty(MovesProperty).GetArrayLength());
-        Assert.Equal(SolvedLines, root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString()));
+        Assert.Equal(
+            SolvedLines,
+            root.GetProperty(ExplodedViewProperty).EnumerateArray().Select(line => line.GetString())
+        );
     }
 
     [Theory]
     [InlineData(UndoAction, UndoOperation)]
     [InlineData(ResetAction, ResetOperation)]
-    public async Task PostUndoOrReset_StaleRevision_Returns409WithOneWarningAndLeavesTheSessionUnchanged(string action, string operation)
+    public async Task PostUndoOrReset_StaleRevision_Returns409WithOneWarningAndLeavesTheSessionUnchanged(
+        string action,
+        string operation
+    )
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
         var created = await CreateStateAsync(testClient);
-        var applied = await ReadStateAsync(await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken]));
+        var applied = await ReadStateAsync(
+            await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken])
+        );
 
         var response = await PostExpectedRevisionAsync(testClient, created.CubeId, action, StaleRevision);
 
@@ -434,26 +476,34 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Theory]
     [InlineData(UndoAction)]
     [InlineData(ResetAction)]
-    public async Task PostUndoOrReset_TwoParallelRequestsWithTheSameRevision_ExactlyOneSucceedsAndTheOtherConflicts(string action)
+    public async Task PostUndoOrReset_TwoParallelRequestsWithTheSameRevision_ExactlyOneSucceedsAndTheOtherConflicts(
+        string action
+    )
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
         var created = await CreateStateAsync(testClient);
-        var applied = await ReadStateAsync(await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken, RightPrimeToken]));
+        var applied = await ReadStateAsync(
+            await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken, RightPrimeToken])
+        );
         var gate = new TaskCompletionSource();
 
-        var requests = Enumerable.Range(0, ParallelRequests)
-            .Select(_ => Task.Run(async () =>
-            {
-                await gate.Task;
-                return await PostExpectedRevisionAsync(testClient, created.CubeId, action, applied.Revision);
-            }))
+        var requests = Enumerable
+            .Range(0, ParallelRequests)
+            .Select(_ =>
+                Task.Run(async () =>
+                {
+                    await gate.Task;
+                    return await PostExpectedRevisionAsync(testClient, created.CubeId, action, applied.Revision);
+                })
+            )
             .ToList();
         gate.SetResult();
         var responses = await Task.WhenAll(requests);
 
         Assert.Equal(
             [HttpStatusCode.OK, HttpStatusCode.Conflict],
-            responses.Select(response => response.StatusCode).Order());
+            responses.Select(response => response.StatusCode).Order()
+        );
         var winner = responses.Single(response => response.StatusCode == HttpStatusCode.OK);
         var winnerRoot = (await ReadBodyAsync(winner)).RootElement;
         await AssertRevisionAsync(testClient, created.CubeId, winnerRoot.GetProperty(RevisionProperty).GetString()!);
@@ -471,19 +521,28 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [InlineData(ResetAction, "{\"expectedRevision\":null}")]
     [InlineData(ResetAction, "null")]
     [InlineData(ResetAction, "")]
-    public async Task PostUndoOrReset_MissingOrEmptyRevision_Returns400WithOneWarningAndLeavesTheSessionUnchanged(string action, string body)
+    public async Task PostUndoOrReset_MissingOrEmptyRevision_Returns400WithOneWarningAndLeavesTheSessionUnchanged(
+        string action,
+        string body
+    )
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
         var created = await CreateStateAsync(testClient);
-        var applied = await ReadStateAsync(await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken]));
+        var applied = await ReadStateAsync(
+            await PostMovesAsync(testClient, created.CubeId, created.Revision, [FrontToken])
+        );
 
         var response = await testClient.PostAsync(
             $"{CubesPath}/{created.CubeId}/{action}",
             new StringContent(body, Encoding.UTF8, JsonContentType),
-            TestContext.Current.CancellationToken);
+            TestContext.Current.CancellationToken
+        );
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        Assert.Equal((int)HttpStatusCode.BadRequest, (await ReadBodyAsync(response)).RootElement.GetProperty(StatusProperty).GetInt32());
+        Assert.Equal(
+            (int)HttpStatusCode.BadRequest,
+            (await ReadBodyAsync(response)).RootElement.GetProperty(StatusProperty).GetInt32()
+        );
         Assert.Equal(LogLevel.Warning, SingleFailure(logs).Level);
         await AssertRevisionAsync(testClient, created.CubeId, applied.Revision);
     }
@@ -493,12 +552,13 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [InlineData(ResetAction)]
     public async Task PostUndoOrReset_MalformedId_Returns400WithOneWarning(string action)
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
 
         var response = await testClient.PostAsJsonAsync(
             $"{CubesPath}/{MalformedId}/{action}",
             new { expectedRevision = StaleRevision },
-            TestContext.Current.CancellationToken);
+            TestContext.Current.CancellationToken
+        );
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         Assert.Equal(LogLevel.Warning, SingleFailure(logs).Level);
@@ -509,7 +569,7 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [InlineData(ResetAction)]
     public async Task PostUndoOrReset_UnknownCube_Returns404WithOneWarning(string action)
     {
-        var (testClient, logs) = CreateLoggingClient();
+        var (testClient, logs) = factory.CreateLoggingClient();
 
         var response = await PostExpectedRevisionAsync(testClient, Guid.NewGuid(), action, StaleRevision);
 
@@ -520,9 +580,14 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
     [Theory]
     [InlineData(UndoAction, UndoOperation)]
     [InlineData(ResetAction, ResetOperation)]
-    public async Task PostUndoOrReset_RepositoryThrows_Returns500WithoutStackTraceAndOneErrorWithTheException(string action, string operation)
+    public async Task PostUndoOrReset_RepositoryThrows_Returns500WithoutStackTraceAndOneErrorWithTheException(
+        string action,
+        string operation
+    )
     {
-        var (testClient, logs) = CreateLoggingClient(services => services.AddSingleton<ICubeRepository, ThrowingCubeRepositoryTestHelper>());
+        var (testClient, logs) = factory.CreateLoggingClient(services =>
+            services.AddSingleton<ICubeRepository, ThrowingCubeRepositoryTestHelper>()
+        );
 
         var cubeId = Guid.NewGuid();
         var response = await PostExpectedRevisionAsync(testClient, cubeId, action, StaleRevision);
@@ -530,7 +595,12 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
         await AssertInternalErrorAsync(response, logs, operation, cubeId.ToString());
     }
 
-    private static async Task AssertInternalErrorAsync(HttpResponseMessage response, FakeLogCollector logs, string operation, string? cubeId)
+    private static async Task AssertInternalErrorAsync(
+        HttpResponseMessage response,
+        FakeLogCollector logs,
+        string operation,
+        string? cubeId
+    )
     {
         Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         var text = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
@@ -547,73 +617,4 @@ public class CubesControllerTests(WebApplicationFactory<Program> factory) : ICla
         Assert.Equal(cubeId, state[ErrorReporter.CubeIdKey]);
         Assert.Equal(((int)HttpStatusCode.InternalServerError).ToString(), state[ErrorReporter.StatusKey]);
     }
-
-    private (HttpClient Client, FakeLogCollector Logs) CreateLoggingClient(Action<IServiceCollection>? configureServices = null)
-    {
-        var loggingFactory = factory.WithWebHostBuilder(host =>
-        {
-            host.ConfigureLogging(logging => logging.AddFakeLogging());
-            host.ConfigureTestServices(services => configureServices?.Invoke(services));
-        });
-        return (loggingFactory.CreateClient(), loggingFactory.Services.GetFakeLogCollector());
-    }
-
-    // AD-12: a failure is logged in one place. Any Warning or worse from another category (the framework's own
-    // middleware, for example) would be a second entry, so the single entry must come from the reporter.
-    private static FakeLogRecord SingleFailure(FakeLogCollector logs)
-    {
-        var record = Assert.Single(logs.GetSnapshot(), entry => entry.Level >= LogLevel.Warning);
-        Assert.Equal(typeof(ErrorReporter).FullName, record.Category);
-        return record;
-    }
-
-    private static Dictionary<string, string?> StateOf(FakeLogRecord record) =>
-        record.StructuredState!.ToDictionary(pair => pair.Key, pair => pair.Value);
-
-    private static async Task<HttpResponseMessage> PostMovesAsync(
-        HttpClient testClient, Guid cubeId, string expectedRevision, IReadOnlyList<string> moves) =>
-        await testClient.PostAsJsonAsync(
-            $"{CubesPath}/{cubeId}/moves",
-            new { expectedRevision, moves },
-            TestContext.Current.CancellationToken);
-
-    private static async Task<HttpResponseMessage> PostExpectedRevisionAsync(
-        HttpClient testClient, Guid cubeId, string action, string expectedRevision) =>
-        await testClient.PostAsJsonAsync(
-            $"{CubesPath}/{cubeId}/{action}",
-            new { expectedRevision },
-            TestContext.Current.CancellationToken);
-
-    private static async Task<(Guid CubeId, string Revision)> ReadStateAsync(HttpResponseMessage response)
-    {
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var root = (await ReadBodyAsync(response)).RootElement;
-        return (root.GetProperty(CubeIdProperty).GetGuid(), root.GetProperty(RevisionProperty).GetString()!);
-    }
-
-    private static string RevisionOf(IEnumerable<string> tokens) =>
-        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(string.Join(MoveSeparator, tokens))));
-
-    private static async Task AssertRevisionAsync(HttpClient testClient, Guid cubeId, string expectedRevision)
-    {
-        var read = await testClient.GetAsync($"{CubesPath}/{cubeId}", TestContext.Current.CancellationToken);
-        var root = (await ReadBodyAsync(read)).RootElement;
-        Assert.Equal(expectedRevision, root.GetProperty(RevisionProperty).GetString());
-    }
-
-    private async Task<(Guid CubeId, string Revision)> CreateStateAsync(HttpClient? testClient = null)
-    {
-        var response = await (testClient ?? client).PostAsync(CubesPath, content: null, TestContext.Current.CancellationToken);
-        var root = (await ReadBodyAsync(response)).RootElement;
-        return (root.GetProperty(CubeIdProperty).GetGuid(), root.GetProperty(RevisionProperty).GetString()!);
-    }
-
-    private async Task<Guid> CreateAsync()
-    {
-        var response = await client.PostAsync(CubesPath, content: null, TestContext.Current.CancellationToken);
-        return (await ReadBodyAsync(response)).RootElement.GetProperty(CubeIdProperty).GetGuid();
-    }
-
-    private static async Task<JsonDocument> ReadBodyAsync(HttpResponseMessage response) =>
-        JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 }

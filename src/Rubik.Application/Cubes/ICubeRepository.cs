@@ -16,5 +16,9 @@ public interface ICubeRepository
     /// travel inside a <see cref="CubeSession"/> because Infrastructure may not reference Domain, so no signature of
     /// the port can name <c>Move</c>.
     /// </summary>
-    Task<UpdateOutcome> TryUpdateAsync(string expectedRevision, CubeSession replacement, CancellationToken cancellationToken);
+    Task<UpdateOutcome> TryUpdateAsync(
+        string expectedRevision,
+        CubeSession replacement,
+        CancellationToken cancellationToken
+    );
 }

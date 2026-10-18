@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
@@ -7,7 +6,11 @@
 
   <ItemGroup>
     <!-- Shared fixtures (see Rubik.Domain.Tests): the same TTC files, so the API is checked against the domain's expected output. -->
-    <Content Include="..\Fixtures\*.txt" Link="Fixtures\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content
+      Include="..\Fixtures\*.txt"
+      Link="Fixtures\%(Filename)%(Extension)"
+      CopyToOutputDirectory="PreserveNewest"
+    />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,5 +21,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Rubik.Api\Rubik.Api.csproj" />
   </ItemGroup>
-
 </Project>

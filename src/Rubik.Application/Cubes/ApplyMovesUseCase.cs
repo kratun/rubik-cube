@@ -13,7 +13,8 @@ public sealed class ApplyMovesUseCase(RevisionCheckedUpdate update)
         Guid cubeId,
         string expectedRevision,
         IReadOnlyList<string?> tokens,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var parsed = new List<Move>(tokens.Count);
         foreach (var token in tokens)
@@ -26,6 +27,11 @@ public sealed class ApplyMovesUseCase(RevisionCheckedUpdate update)
             parsed.Add(move);
         }
 
-        return await update.ExecuteAsync(cubeId, expectedRevision, current => current.Concat(parsed), cancellationToken);
+        return await update.ExecuteAsync(
+            cubeId,
+            expectedRevision,
+            current => current.Concat(parsed),
+            cancellationToken
+        );
     }
 }

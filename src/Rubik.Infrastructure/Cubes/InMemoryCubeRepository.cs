@@ -3,7 +3,9 @@ using Rubik.Application.Cubes;
 
 namespace Rubik.Infrastructure.Cubes;
 
-/// <summary>Keeps sessions in memory for the life of the process. Register it as a singleton, or sessions are lost.</summary>
+/// <summary>
+/// Keeps sessions in memory for the life of the process. Register it as a singleton, or sessions are lost.
+/// </summary>
 public sealed class InMemoryCubeRepository : ICubeRepository
 {
     private readonly ConcurrentDictionary<Guid, CubeSession> sessions = new();
@@ -26,7 +28,11 @@ public sealed class InMemoryCubeRepository : ICubeRepository
     // the entry after we read it. The loop therefore reads again and decides on the fresh session: a different
     // revision gives RevisionConflict, an equal one (same content) is still a valid write. It repeats only when
     // another writer succeeded in between, so it ends and never blocks.
-    public Task<UpdateOutcome> TryUpdateAsync(string expectedRevision, CubeSession replacement, CancellationToken cancellationToken)
+    public Task<UpdateOutcome> TryUpdateAsync(
+        string expectedRevision,
+        CubeSession replacement,
+        CancellationToken cancellationToken
+    )
     {
         // Retry loop, not a spin on a conflict: we only come round again when TryUpdate lost to another writer.
         while (true)

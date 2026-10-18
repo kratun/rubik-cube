@@ -55,7 +55,11 @@ public class InMemoryCubeRepositoryTests
         var session = new CubeSession(Guid.NewGuid(), [FrontTurn]);
         await repository.CreateAsync(session, CancellationToken.None);
 
-        var outcome = await repository.TryUpdateAsync(session.Revision, new CubeSession(session.CubeId, [FrontTurn, RightTurn]), CancellationToken.None);
+        var outcome = await repository.TryUpdateAsync(
+            session.Revision,
+            new CubeSession(session.CubeId, [FrontTurn, RightTurn]),
+            CancellationToken.None
+        );
 
         Assert.Equal(UpdateOutcome.Updated, outcome);
         var stored = await repository.GetAsync(session.CubeId, CancellationToken.None);
@@ -68,7 +72,11 @@ public class InMemoryCubeRepositoryTests
         var session = new CubeSession(Guid.NewGuid(), [FrontTurn]);
         await repository.CreateAsync(session, CancellationToken.None);
 
-        var outcome = await repository.TryUpdateAsync(StaleRevision, new CubeSession(session.CubeId, [RightTurn]), CancellationToken.None);
+        var outcome = await repository.TryUpdateAsync(
+            StaleRevision,
+            new CubeSession(session.CubeId, [RightTurn]),
+            CancellationToken.None
+        );
 
         Assert.Equal(UpdateOutcome.RevisionConflict, outcome);
         Assert.Same(session, await repository.GetAsync(session.CubeId, CancellationToken.None));
@@ -77,7 +85,11 @@ public class InMemoryCubeRepositoryTests
     [Fact]
     public async Task TryUpdateAsync_UnknownId_ReturnsNotFound()
     {
-        var outcome = await repository.TryUpdateAsync(StaleRevision, new CubeSession(Guid.NewGuid(), [RightTurn]), CancellationToken.None);
+        var outcome = await repository.TryUpdateAsync(
+            StaleRevision,
+            new CubeSession(Guid.NewGuid(), [RightTurn]),
+            CancellationToken.None
+        );
 
         Assert.Equal(UpdateOutcome.NotFound, outcome);
     }
@@ -89,18 +101,28 @@ public class InMemoryCubeRepositoryTests
         await repository.CreateAsync(session, CancellationToken.None);
         using var gate = new ManualResetEventSlim();
 
-        var writers = Enumerable.Range(0, ParallelWriters)
-            .Select(_ => Task.Run(() =>
-            {
-                gate.Wait();
-                return repository.TryUpdateAsync(session.Revision, new CubeSession(session.CubeId, [RightTurn]), CancellationToken.None);
-            }))
+        var writers = Enumerable
+            .Range(0, ParallelWriters)
+            .Select(_ =>
+                Task.Run(() =>
+                {
+                    gate.Wait();
+                    return repository.TryUpdateAsync(
+                        session.Revision,
+                        new CubeSession(session.CubeId, [RightTurn]),
+                        CancellationToken.None
+                    );
+                })
+            )
             .ToList();
         gate.Set();
         var outcomes = await Task.WhenAll(writers);
 
         Assert.Equal(SingleWinner, outcomes.Count(outcome => outcome == UpdateOutcome.Updated));
-        Assert.Equal(ParallelWriters - SingleWinner, outcomes.Count(outcome => outcome == UpdateOutcome.RevisionConflict));
+        Assert.Equal(
+            ParallelWriters - SingleWinner,
+            outcomes.Count(outcome => outcome == UpdateOutcome.RevisionConflict)
+        );
     }
 
     [Fact]
@@ -109,7 +131,8 @@ public class InMemoryCubeRepositoryTests
         var session = new CubeSession(Guid.NewGuid(), []);
         await repository.CreateAsync(session, CancellationToken.None);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => repository.CreateAsync(session, CancellationToken.None));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            repository.CreateAsync(session, CancellationToken.None)
+        );
     }
 }

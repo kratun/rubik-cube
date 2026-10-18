@@ -6,15 +6,16 @@ public class Vector3Tests
 {
     private const int Scalar = 3;
 
-    public static TheoryData<Vector3, Vector3, Vector3> ClockwiseQuarterTurns => new()
-    {
-        // Seen from the tip of the axis looking at the origin, clockwise.
-        { new Vector3(0, 1, 0), new Vector3(0, 0, 1), new Vector3(1, 0, 0) },
-        { new Vector3(1, 0, 0), new Vector3(0, 0, 1), new Vector3(0, -1, 0) },
-        { new Vector3(0, 0, 1), new Vector3(1, 0, 0), new Vector3(0, 1, 0) },
-        { new Vector3(0, 1, 0), new Vector3(0, 1, 0), new Vector3(0, 1, 0) },
-        { new Vector3(1, 1, 1), new Vector3(0, 1, 0), new Vector3(-1, 1, 1) },
-    };
+    public static TheoryData<Vector3, Vector3, Vector3> ClockwiseQuarterTurns =>
+        new()
+        {
+            // Seen from the tip of the axis looking at the origin, clockwise.
+            { new Vector3(0, 1, 0), new Vector3(0, 0, 1), new Vector3(1, 0, 0) },
+            { new Vector3(1, 0, 0), new Vector3(0, 0, 1), new Vector3(0, -1, 0) },
+            { new Vector3(0, 0, 1), new Vector3(1, 0, 0), new Vector3(0, 1, 0) },
+            { new Vector3(0, 1, 0), new Vector3(0, 1, 0), new Vector3(0, 1, 0) },
+            { new Vector3(1, 1, 1), new Vector3(0, 1, 0), new Vector3(-1, 1, 1) },
+        };
 
     [Theory]
     [MemberData(nameof(ClockwiseQuarterTurns))]

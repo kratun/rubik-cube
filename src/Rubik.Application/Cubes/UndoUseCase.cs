@@ -8,6 +8,9 @@ namespace Rubik.Application.Cubes;
 /// </summary>
 public sealed class UndoUseCase(RevisionCheckedUpdate update)
 {
-    public Task<Result<CubeState>> ExecuteAsync(Guid cubeId, string expectedRevision, CancellationToken cancellationToken) =>
-        update.ExecuteAsync(cubeId, expectedRevision, current => current.SkipLast(1), cancellationToken);
+    public Task<Result<CubeState>> ExecuteAsync(
+        Guid cubeId,
+        string expectedRevision,
+        CancellationToken cancellationToken
+    ) => update.ExecuteAsync(cubeId, expectedRevision, current => current.SkipLast(1), cancellationToken);
 }

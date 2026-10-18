@@ -4,45 +4,47 @@ namespace Rubik.Domain.Tests.Cubes;
 
 public class MoveTests
 {
-    public static TheoryData<string, Face, Direction> ValidTokens => new()
-    {
-        { "F", Face.Front, Direction.Clockwise },
-        { "R", Face.Right, Direction.Clockwise },
-        { "U", Face.Up, Direction.Clockwise },
-        { "B", Face.Back, Direction.Clockwise },
-        { "L", Face.Left, Direction.Clockwise },
-        { "D", Face.Down, Direction.Clockwise },
-        { "F'", Face.Front, Direction.CounterClockwise },
-        { "R'", Face.Right, Direction.CounterClockwise },
-        { "U'", Face.Up, Direction.CounterClockwise },
-        { "B'", Face.Back, Direction.CounterClockwise },
-        { "L'", Face.Left, Direction.CounterClockwise },
-        { "D'", Face.Down, Direction.CounterClockwise },
-    };
+    public static TheoryData<string, Face, Direction> ValidTokens =>
+        new()
+        {
+            { "F", Face.Front, Direction.Clockwise },
+            { "R", Face.Right, Direction.Clockwise },
+            { "U", Face.Up, Direction.Clockwise },
+            { "B", Face.Back, Direction.Clockwise },
+            { "L", Face.Left, Direction.Clockwise },
+            { "D", Face.Down, Direction.Clockwise },
+            { "F'", Face.Front, Direction.CounterClockwise },
+            { "R'", Face.Right, Direction.CounterClockwise },
+            { "U'", Face.Up, Direction.CounterClockwise },
+            { "B'", Face.Back, Direction.CounterClockwise },
+            { "L'", Face.Left, Direction.CounterClockwise },
+            { "D'", Face.Down, Direction.CounterClockwise },
+        };
 
-    public static TheoryData<string> InvalidTokens => new()
-    {
-        "f",
-        "r'",
-        "u",
-        "d'",
-        "R'x",
-        "F\n",
-        "F'\n",
-        "F\t",
-        " ",
-        "F2",
-        "X",
-        "F''",
-        "F'R",
-        "FF",
-        "'",
-        "'F",
-        " F",
-        "F ",
-        "F\u2019",
-        string.Empty,
-    };
+    public static TheoryData<string> InvalidTokens =>
+        new()
+        {
+            "f",
+            "r'",
+            "u",
+            "d'",
+            "R'x",
+            "F\n",
+            "F'\n",
+            "F\t",
+            " ",
+            "F2",
+            "X",
+            "F''",
+            "F'R",
+            "FF",
+            "'",
+            "'F",
+            " F",
+            "F ",
+            "F\u2019",
+            string.Empty,
+        };
 
     [Theory]
     [MemberData(nameof(ValidTokens))]
@@ -60,9 +62,10 @@ public class MoveTests
         var parsedMoves = ValidTokens
             .Select(row => Move.TryParse(row.Data.Item1, out var move) ? move : default)
             .ToHashSet();
-        var expectedMoves = from face in Enum.GetValues<Face>()
-                            from direction in Enum.GetValues<Direction>()
-                            select new Move(face, direction);
+        var expectedMoves =
+            from face in Enum.GetValues<Face>()
+            from direction in Enum.GetValues<Direction>()
+            select new Move(face, direction);
 
         Assert.True(parsedMoves.SetEquals(expectedMoves));
     }

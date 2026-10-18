@@ -5,6 +5,12 @@
   align-self: start;
   --tile-size: clamp(1rem, 6vw, 2.75rem);
   --tile-gap: 2px;
+  --colour-tile-white: #fff;
+  --colour-tile-yellow: #ffd500;
+  --colour-tile-orange: #ff8c00;
+  --colour-tile-red: #d00000;
+  --colour-tile-green: #009b48;
+  --colour-tile-blue: #0046ad;
   display: grid;
   grid-template-areas:
     ". up . ."
@@ -73,25 +79,25 @@
 }
 
 .tile[data-colour="White"] {
-  background: #fff;
+  background: var(--colour-tile-white);
 }
 
 .tile[data-colour="Yellow"] {
-  background: #ffd500;
+  background: var(--colour-tile-yellow);
 }
 
 .tile[data-colour="Orange"] {
-  background: #ff8c00;
+  background: var(--colour-tile-orange);
 }
 
 .tile[data-colour="Red"] {
-  background: #d00000;
+  background: var(--colour-tile-red);
 }
 
 .tile[data-colour="Green"] {
-  background: #009b48;
+  background: var(--colour-tile-green);
 }
 
 .tile[data-colour="Blue"] {
-  background: #0046ad;
+  background: var(--colour-tile-blue);
 }

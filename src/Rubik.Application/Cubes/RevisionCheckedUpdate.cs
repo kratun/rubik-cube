@@ -16,7 +16,8 @@ public sealed class RevisionCheckedUpdate(ICubeRepository repository)
         Guid cubeId,
         string expectedRevision,
         Func<IReadOnlyList<Move>, IEnumerable<Move>> buildMoves,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var snapshot = await repository.GetAsync(cubeId, cancellationToken);
         if (snapshot is null)

@@ -1,50 +1,17 @@
-using Rubik.Api.Errors;
-using Rubik.Api.OpenApi;
-using Rubik.Application.Cubes;
-using Rubik.Infrastructure.Cubes;
+using Rubik.Api.Extensions;
 
 const string HealthPath = "/health";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options =>
-        options.InvalidModelStateResponseFactory = context => context.HttpContext.RequestServices
-            .GetRequiredService<ResultMapper>().ToBadRequest(context.HttpContext));
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SupportNonNullableReferenceTypes();
-    options.SchemaFilter<RequiredPropertiesSchemaFilter>();
-    options.OperationFilter<RequiredRequestBodyOperationFilter>();
-});
-builder.Services.AddHealthChecks();
-
-// Singleton: a shorter lifetime would lose every session (AD-5).
-builder.Services.AddSingleton<ICubeRepository, InMemoryCubeRepository>();
-builder.Services.AddScoped<CreateCubeUseCase>();
-builder.Services.AddScoped<GetCubeUseCase>();
-builder.Services.AddScoped<RevisionCheckedUpdate>();
-builder.Services.AddScoped<ApplyMovesUseCase>();
-builder.Services.AddScoped<UndoUseCase>();
-builder.Services.AddScoped<ResetUseCase>();
-builder.Services.AddSingleton<ErrorReporter>();
-builder.Services.AddSingleton<ResultMapper>();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-
-// UseExceptionHandler requires an IProblemDetailsService as its fallback when no handler takes the exception.
-builder.Services.AddProblemDetails();
+builder.Services.AddCubeApi();
+builder.Services.AddCubeOpenApi();
+builder.Services.AddCubeServices();
 
 var app = builder.Build();
 
-app.UseExceptionHandler();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseCubeErrorHandling();
+app.UseDevelopmentTools();
 app.MapControllers();
 app.MapHealthChecks(HealthPath);
 

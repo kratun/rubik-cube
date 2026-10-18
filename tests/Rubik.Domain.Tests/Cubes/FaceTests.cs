@@ -6,15 +6,16 @@ public class FaceTests
 {
     private const int FaceCount = 6;
 
-    public static TheoryData<Face, Vector3> ExpectedNormals => new()
-    {
-        { Face.Up, new Vector3(0, 1, 0) },
-        { Face.Down, new Vector3(0, -1, 0) },
-        { Face.Left, new Vector3(-1, 0, 0) },
-        { Face.Right, new Vector3(1, 0, 0) },
-        { Face.Front, new Vector3(0, 0, 1) },
-        { Face.Back, new Vector3(0, 0, -1) },
-    };
+    public static TheoryData<Face, Vector3> ExpectedNormals =>
+        new()
+        {
+            { Face.Up, new Vector3(0, 1, 0) },
+            { Face.Down, new Vector3(0, -1, 0) },
+            { Face.Left, new Vector3(-1, 0, 0) },
+            { Face.Right, new Vector3(1, 0, 0) },
+            { Face.Front, new Vector3(0, 0, 1) },
+            { Face.Back, new Vector3(0, 0, -1) },
+        };
 
     [Theory]
     [MemberData(nameof(ExpectedNormals))]

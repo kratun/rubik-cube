@@ -16,7 +16,21 @@ internal static class ArchitectureRules
         [Domain] = [],
     };
 
+    /// <summary>The assemblies that must declare no package at all (the Domain is pure, AD-1).</summary>
+    private static readonly string[] PackageFree = [Domain];
+
     public static IReadOnlyCollection<string> Assemblies => Allowed.Keys.ToArray();
+
+    /// <summary>
+    /// Returns every "Project -> Package" pair in <paramref name="actual"/> declared by a package-free project.
+    /// </summary>
+    public static IReadOnlyList<string> PackageViolations(
+        IReadOnlyDictionary<string, IReadOnlyCollection<string>> actual
+    ) =>
+        actual
+            .Where(entry => PackageFree.Contains(entry.Key))
+            .SelectMany(entry => entry.Value.Select(package => $"{entry.Key} -> {package}"))
+            .ToList();
 
     /// <summary>Returns every "From -> To" edge in <paramref name="actual"/> that AD-1 does not allow.</summary>
     public static IReadOnlyList<string> Violations(IReadOnlyDictionary<string, IReadOnlyCollection<string>> actual) =>

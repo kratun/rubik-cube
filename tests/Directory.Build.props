@@ -1,5 +1,4 @@
 <Project>
-
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
 
   <PropertyGroup>
@@ -10,5 +9,4 @@
     <PackageReference Include="xunit.v3" />
     <Using Include="Xunit" />
   </ItemGroup>
-
 </Project>

@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
@@ -8,5 +7,4 @@
     <ProjectReference Include="..\Rubik.Application\Rubik.Application.csproj" />
     <ProjectReference Include="..\Rubik.Infrastructure\Rubik.Infrastructure.csproj" />
   </ItemGroup>
-
 </Project>

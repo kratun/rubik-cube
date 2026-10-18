@@ -28,7 +28,12 @@ public class ApplyMovesUseCaseTests
     {
         var session = await CreateSessionAsync(FrontTurn);
 
-        var result = await UseCase.ExecuteAsync(session.CubeId, session.Revision, [RightPrimeToken], CancellationToken.None);
+        var result = await UseCase.ExecuteAsync(
+            session.CubeId,
+            session.Revision,
+            [RightPrimeToken],
+            CancellationToken.None
+        );
 
         Assert.True(result.IsSuccess);
         var stored = Assert.Single(repository.Created);
@@ -56,7 +61,12 @@ public class ApplyMovesUseCaseTests
     {
         var session = await CreateSessionAsync(FrontTurn);
 
-        var result = await UseCase.ExecuteAsync(session.CubeId, StaleRevision, [RightPrimeToken], CancellationToken.None);
+        var result = await UseCase.ExecuteAsync(
+            session.CubeId,
+            StaleRevision,
+            [RightPrimeToken],
+            CancellationToken.None
+        );
 
         Assert.False(result.IsSuccess);
         Assert.Equal(new RevisionConflict(session.CubeId), result.Error);
@@ -119,7 +129,12 @@ public class ApplyMovesUseCaseTests
     {
         var session = await CreateSessionAsync(FrontTurn);
 
-        var result = await UseCase.ExecuteAsync(session.CubeId, session.Revision, [FrontToken, token], CancellationToken.None);
+        var result = await UseCase.ExecuteAsync(
+            session.CubeId,
+            session.Revision,
+            [FrontToken, token],
+            CancellationToken.None
+        );
 
         Assert.Equal(new InvalidMove(token), result.Error);
         Assert.Empty(repository.Updates);
@@ -132,7 +147,12 @@ public class ApplyMovesUseCaseTests
     {
         var session = await CreateSessionAsync(FrontTurn);
 
-        var result = await UseCase.ExecuteAsync(session.CubeId, StaleRevision, [UnknownFaceToken], CancellationToken.None);
+        var result = await UseCase.ExecuteAsync(
+            session.CubeId,
+            StaleRevision,
+            [UnknownFaceToken],
+            CancellationToken.None
+        );
 
         Assert.Equal(new InvalidMove(UnknownFaceToken), result.Error);
     }
@@ -140,7 +160,12 @@ public class ApplyMovesUseCaseTests
     [Fact]
     public async Task ExecuteAsync_InvalidTokenAndUnknownCube_ReturnsInvalidMove()
     {
-        var result = await UseCase.ExecuteAsync(Guid.NewGuid(), StaleRevision, [UnknownFaceToken], CancellationToken.None);
+        var result = await UseCase.ExecuteAsync(
+            Guid.NewGuid(),
+            StaleRevision,
+            [UnknownFaceToken],
+            CancellationToken.None
+        );
 
         Assert.Equal(new InvalidMove(UnknownFaceToken), result.Error);
     }
@@ -151,7 +176,11 @@ public class ApplyMovesUseCaseTests
         var session = await CreateSessionAsync();
 
         var result = await UseCase.ExecuteAsync(
-            session.CubeId, session.Revision, [FrontToken, LowerCaseToken, UnknownFaceToken], CancellationToken.None);
+            session.CubeId,
+            session.Revision,
+            [FrontToken, LowerCaseToken, UnknownFaceToken],
+            CancellationToken.None
+        );
 
         Assert.Equal(new InvalidMove(LowerCaseToken), result.Error);
     }

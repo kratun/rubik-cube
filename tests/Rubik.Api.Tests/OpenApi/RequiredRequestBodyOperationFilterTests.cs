@@ -12,12 +12,8 @@ public class RequiredRequestBodyOperationFilterTests(WebApplicationFactory<Progr
     private const string RequestBodyProperty = "requestBody";
     private const string RequiredProperty = "required";
 
-    public static TheoryData<string> BodyPaths => new()
-    {
-        "/api/cubes/{id}/moves",
-        "/api/cubes/{id}/undo",
-        "/api/cubes/{id}/reset",
-    };
+    public static TheoryData<string> BodyPaths =>
+        new() { "/api/cubes/{id}/moves", "/api/cubes/{id}/undo", "/api/cubes/{id}/reset" };
 
     [Theory]
     [MemberData(nameof(BodyPaths))]
@@ -25,7 +21,10 @@ public class RequiredRequestBodyOperationFilterTests(WebApplicationFactory<Progr
     {
         using var document = await OpenApiDocumentTestHelper.FetchAsync(factory);
 
-        var body = document.RootElement.GetProperty(PathsProperty).GetProperty(path).GetProperty(PostOperation)
+        var body = document
+            .RootElement.GetProperty(PathsProperty)
+            .GetProperty(path)
+            .GetProperty(PostOperation)
             .GetProperty(RequestBodyProperty);
 
         Assert.Equal(JsonValueKind.True, body.GetProperty(RequiredProperty).ValueKind);
