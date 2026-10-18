@@ -27,9 +27,5 @@
 ## For the quality pass follow-up
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-4-2a-quality-pass-and-cleanup-nfr3-nfr5.md`
-  summary: Add `dotnet tool restore` to the CLAUDE.md line about CSharpier and to the README prerequisites (Story 4.1).
-  evidence: CSharpier is a local tool; on a fresh clone `dotnet csharpier check .` fails until `dotnet tool restore` has run. The fix edits CLAUDE.md, so the review deferred it.
-
-- source_spec: `_bmad-output/implementation-artifacts/spec-4-2a-quality-pass-and-cleanup-nfr3-nfr5.md`
   summary: Mirror the 4.2a structure in the architecture spine: the `Extensions/` extension methods, `StatusCodeErrorWriter` for empty 4xx and 5xx responses, and `SuppressMapClientErrors`.
   evidence: The code review of 4.2a noted that the spine does not mention them; the spine is a planning artifact outside the story's scope.

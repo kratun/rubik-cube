@@ -5,6 +5,7 @@ A Rubik’s Cube simulator with a .NET core and React UI. Rotates any face, show
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) (10.0.302 or newer 10.0.x; pinned in `global.json`)
 - [Node.js](https://nodejs.org/) 24 or newer, for the web app in `web/`
+- The local .NET tools (CSharpier, listed in `.config/dotnet-tools.json`): run `dotnet tool restore` once after cloning; without it `dotnet csharpier check .` fails
 
 ## Build
 
