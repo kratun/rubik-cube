@@ -1,4 +1,4 @@
-import type { ErrorDetails } from "../../api/types";
+import type { ErrorDetails } from "../../../services/types";
 
 export const STATUS_OK = 200;
 export const STATUS_BAD_REQUEST = 400;

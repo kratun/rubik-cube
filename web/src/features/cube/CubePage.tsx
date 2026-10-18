@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { CubeView } from "./CubeView";
-import { MoveHistory } from "./MoveHistory";
-import { MovePad } from "./MovePad";
-import { SessionControls } from "./SessionControls";
-import { cubeIdFromPath } from "./sessionUrl";
-import { useCubeSession } from "./useCubeSession";
-import { useMoveKeys } from "./useMoveKeys";
+import { CubeView } from "./components/CubeView";
+import { MoveHistory } from "./components/MoveHistory";
+import { MovePad } from "./components/MovePad";
+import { SessionControls } from "./components/SessionControls";
+import { cubeIdFromPath } from "./utils/sessionUrl";
+import { useCubeSession } from "./hooks/useCubeSession";
+import { useMoveKeys } from "./hooks/useMoveKeys";
 
 export const LOADING_MESSAGE = "Loading the cube…";
 export const START_NEW_CUBE_LABEL = "Start a new cube";

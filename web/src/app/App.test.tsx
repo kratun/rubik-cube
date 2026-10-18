@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { jsonResponse } from "../features/cube/apiResponseFixture";
-import { faceLabel } from "../features/cube/CubeView";
-import { SOLVED_CUBE } from "../features/cube/solvedCubeFixture";
+import { jsonResponse } from "../features/cube/testing/apiResponseFixture";
+import { faceLabel } from "../features/cube/components/CubeView";
+import { SOLVED_CUBE } from "../features/cube/testing/solvedCubeFixture";
 import { APP_TITLE, App } from "./App";
 import { ERROR_FALLBACK_MESSAGE } from "./ErrorBoundary";
 

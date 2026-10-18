@@ -8,8 +8,8 @@ import {
   NETWORK_ERROR_MESSAGE,
   RESET_SEGMENT,
   UNDO_SEGMENT,
-} from "../../api/client";
-import type { CubeState } from "../../api/types";
+} from "../../services/client";
+import type { CubeState } from "../../services/types";
 import {
   NOT_FOUND_DETAIL,
   SERVER_ERROR_DETAIL,
@@ -20,17 +20,17 @@ import {
   errorResponse,
   jsonResponse,
   requestBodyOf,
-} from "./apiResponseFixture";
+} from "./testing/apiResponseFixture";
 import { CubePage, START_NEW_CUBE_LABEL } from "./CubePage";
-import { EXPLODED_VIEW_HEADING, FACE_NAMES, faceLabel } from "./CubeView";
-import { NO_MOVES_MESSAGE } from "./MoveHistory";
-import { MOVE_PAD_LABEL } from "./MovePad";
-import { RESET_LABEL, UNDO_LABEL } from "./SessionControls";
-import { MOVED_CUBE } from "./movedCubeFixture";
-import { MOVE_TOKENS } from "./moves";
-import { cubePagePath } from "./sessionUrl";
-import { SOLVED_CUBE, SOLVED_CUBE_ID, SOLVED_EXPLODED_VIEW } from "./solvedCubeFixture";
-import { CONFLICT_MESSAGE, CUBE_NOT_FOUND_MESSAGE } from "./useCubeSession";
+import { EXPLODED_VIEW_HEADING, FACE_NAMES, faceLabel } from "./components/CubeView";
+import { NO_MOVES_MESSAGE } from "./components/MoveHistory";
+import { MOVE_PAD_LABEL } from "./components/MovePad";
+import { RESET_LABEL, UNDO_LABEL } from "./components/SessionControls";
+import { MOVED_CUBE } from "./testing/movedCubeFixture";
+import { MOVE_TOKENS } from "./utils/moves";
+import { cubePagePath } from "./utils/sessionUrl";
+import { SOLVED_CUBE, SOLVED_CUBE_ID, SOLVED_EXPLODED_VIEW } from "./testing/solvedCubeFixture";
+import { CONFLICT_MESSAGE, CUBE_NOT_FOUND_MESSAGE } from "./hooks/useCubeSession";
 
 const ROOT = "/";
 const UNKNOWN_PATH = "/cubes/unknown";

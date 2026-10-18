@@ -1,4 +1,4 @@
-import type { CubeState } from "../../api/types";
+import type { CubeState } from "../../../services/types";
 
 export const SOLVED_CUBE_ID = "0c635560-7b8e-4721-88bb-76d310403744";
 export const SOLVED_REVISION = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
