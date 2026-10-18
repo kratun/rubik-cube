@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { moveForKey } from "./moves";
+import { moveForKey } from "../utils/moves";
 
 const TEXT_ENTRY_TAGS: readonly string[] = ["INPUT", "TEXTAREA", "SELECT"];
 

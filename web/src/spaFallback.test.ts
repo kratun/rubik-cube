@@ -1,5 +1,5 @@
 import { createServer, type ViteDevServer } from "vite";
-import { STATUS_OK } from "./features/cube/apiResponseFixture";
+import { STATUS_OK } from "./features/cube/fixtures/apiResponseFixture";
 
 const CUBE_PATH = "/cubes/0c635560-7b8e-4721-88bb-76d310403744";
 const ROOT_ELEMENT = '<div id="root"></div>';

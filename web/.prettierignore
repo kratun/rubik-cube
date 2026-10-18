@@ -1,4 +1,4 @@
 dist
 node_modules
 package-lock.json
-src/api/generated
+src/services/types/generated

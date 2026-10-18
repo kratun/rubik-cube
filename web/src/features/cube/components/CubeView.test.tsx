@@ -1,6 +1,10 @@
 import { render, screen, within } from "@testing-library/react";
 import { CubeView, EXPLODED_VIEW_HEADING, FACE_NAMES, faceLabel } from "./CubeView";
-import { SOLVED_CUBE, SOLVED_EXPLODED_VIEW, SOLVED_FACE_COLOURS } from "./solvedCubeFixture";
+import {
+  SOLVED_CUBE,
+  SOLVED_EXPLODED_VIEW,
+  SOLVED_FACE_COLOURS,
+} from "../fixtures/solvedCubeFixture";
 
 const TILES_PER_FACE = 9;
 const FACE_COUNT = 6;

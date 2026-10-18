@@ -1,4 +1,4 @@
-import type { ApiResult } from "./apiResult";
+import type { ApiResult } from "./types/apiResult";
 import type { ApplyMovesRequest, CubeState, ErrorDetails, ExpectedRevisionRequest } from "./types";
 
 export const CUBES_PATH = "/api/cubes";

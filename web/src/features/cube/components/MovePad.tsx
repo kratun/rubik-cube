@@ -1,4 +1,4 @@
-import { MOVE_TOKENS } from "./moves";
+import { MOVE_TOKENS } from "../utils/moves";
 
 export const MOVE_PAD_LABEL = "Moves";
 

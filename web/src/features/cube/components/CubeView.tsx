@@ -1,4 +1,4 @@
-import type { CubeState } from "../../api/types";
+import type { CubeState } from "../../../services/types";
 import "./CubeView.css";
 
 // Face keys of the API contract. The CSS places them in the exploded layout (AD-3).

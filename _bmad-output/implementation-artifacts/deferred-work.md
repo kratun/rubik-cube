@@ -18,7 +18,7 @@
 
 ## Deferred from: code review of spec-3-1-frontend-scaffold (2026-10-18)
 
-- No check that the committed `web/src/api/generated/schema.d.ts` matches the API. Regenerate with `npm run api:generate` (Development API on port 5080) and commit it with every contract change; deploy backend and frontend together. A CI step that runs the script and fails on a non-empty `git diff` closes it (AD-11, optional); take it with CI (Story 5.3). The README should state the `api:generate` prerequisite (Story 3.5, "Run the UI").
+- No check that the committed `web/src/services/types/generated/schema.d.ts` matches the API. Regenerate with `npm run api:generate` (Development API on port 5080) and commit it with every contract change; deploy backend and frontend together. A CI step that runs the script and fails on a non-empty `git diff` closes it (AD-11, optional); take it with CI (Story 5.3). The README should state the `api:generate` prerequisite (Story 3.5, "Run the UI").
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-3-1-frontend-scaffold-with-generated-api-types-and-a-typed-clien.md`
   summary: Make `Program.cs` thinner at the quality pass (Story 4.2): move the service registrations and the Swagger setup into extension methods, for example `AddCubeServices`, `AddOpenApiDocument` and `UseDevelopmentTools`, in the Api project.
@@ -27,3 +27,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-3-3-apply-moves-by-buttons-and-keyboard-fr9.md`
   summary: Check the UI against WCAG 2.1 Level AA at the quality pass (Story 4.2) and fix what fails.
   evidence: Stories 3.2 and 3.3 only cover the basics (real buttons, colour names on tiles, errors in `role="alert"`, queries by role). Not yet checked: colour contrast of text and tiles (1.4.3, 1.4.11), colours not being the only signal (1.4.1), visible focus (2.4.7), keyboard shortcuts that do not clash with assistive technology (2.1.4: single-character keys need a way to turn off or remap; today `F R U B L D` work on the whole page), status messages announced to screen readers (4.1.3), reflow and zoom to 200% (1.4.4, 1.4.10), target size, and an automated pass (axe or Lighthouse) plus a manual keyboard and screen reader run. `aria-keyshortcuts` on the move buttons was also suggested in the 3.3 review. Story 3.4 adds the history list and the Undo and Reset buttons: a successful move, undo or reset changes the history silently, so check 4.1.3 for those too (for example an aria-live region), and the focus move from Undo to Reset when the history empties.
+
+## Deferred from: code review of refactor/web-folder-structure (2026-10-18)
+
+- The ESLint layer rules in `web/eslint.config.js` (`no-restricted-imports`) are only checked by `npm run lint`; no vitest case proves that a violation fails, and no CI job runs lint yet. Add a test that lints virtual files with the ESLint API (for example a component importing `services/client`, a util importing `react`, a hook importing a component, production code importing a fixture) at the quality pass (Story 4.2) or with CI (Story 5.3). Until then the rules were checked once by hand with temporary violating files.

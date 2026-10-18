@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import type { ApiResult } from "../../api/apiResult";
-import { applyMoves, createCube, getCube, resetCube, undoMove } from "../../api/client";
-import type { CubeState } from "../../api/types";
-import { cubePagePath } from "./sessionUrl";
+import type { ApiResult } from "../../../services/types/apiResult";
+import { applyMoves, createCube, getCube, resetCube, undoMove } from "../../../services/client";
+import type { CubeState } from "../../../services/types";
+import { cubePagePath } from "../utils/sessionUrl";
 
 export const CUBE_NOT_FOUND_MESSAGE = "Cube not found";
 export const CONFLICT_MESSAGE = "The cube was changed by someone else";
