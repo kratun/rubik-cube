@@ -3,15 +3,17 @@ import { useEffect, useRef } from "react";
 export const SESSION_CONTROLS_LABEL = "Session";
 export const UNDO_LABEL = "Undo";
 export const RESET_LABEL = "Reset";
+export const TTC_LABEL = "Apply TTC test sequence";
 
 interface SessionControlsProps {
   canUndo: boolean;
   onUndo: () => void;
   onReset: () => void;
+  onApplyTtc: () => void;
 }
 
-/** Undo is disabled when there is nothing to undo; Reset stays available. */
-export function SessionControls({ canUndo, onUndo, onReset }: SessionControlsProps) {
+/** Undo is disabled when there is nothing to undo; Reset and the TTC preset stay available. */
+export function SessionControls({ canUndo, onUndo, onReset, onApplyTtc }: SessionControlsProps) {
   const undoButton = useRef<HTMLButtonElement>(null);
   const resetButton = useRef<HTMLButtonElement>(null);
   const couldUndo = useRef(canUndo);
@@ -35,6 +37,9 @@ export function SessionControls({ canUndo, onUndo, onReset }: SessionControlsPro
       </button>
       <button ref={resetButton} type="button" onClick={onReset}>
         {RESET_LABEL}
+      </button>
+      <button type="button" onClick={onApplyTtc}>
+        {TTC_LABEL}
       </button>
     </div>
   );

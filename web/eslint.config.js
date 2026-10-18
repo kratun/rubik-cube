@@ -18,7 +18,7 @@ const restrict = (files, ...patterns) => ({
   rules: { "no-restricted-imports": ["error", { patterns: [fixturesOnly, ...patterns] }] },
 });
 export default tseslint.config(
-  { ignores: ["dist", "src/services/types/generated"] },
+  { ignores: ["dist", "src/services/types/generated", "test-results", "playwright-report"] },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   reactHooks.configs.flat.recommended,

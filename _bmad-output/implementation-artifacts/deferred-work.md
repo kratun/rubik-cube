@@ -18,7 +18,7 @@
 
 ## Deferred from: code review of spec-3-1-frontend-scaffold (2026-10-18)
 
-- No check that the committed `web/src/services/types/generated/schema.d.ts` matches the API. Regenerate with `npm run api:generate` (Development API on port 5080) and commit it with every contract change; deploy backend and frontend together. A CI step that runs the script and fails on a non-empty `git diff` closes it (AD-11, optional); take it with CI (Story 5.3). The README should state the `api:generate` prerequisite (Story 3.5, "Run the UI").
+- No check that the committed `web/src/services/types/generated/schema.d.ts` matches the API. Regenerate with `npm run api:generate` (Development API on port 5080) and commit it with every contract change; deploy backend and frontend together. A CI step that runs the script and fails on a non-empty `git diff` closes it (AD-11, optional); take it with CI (Story 5.3).
 
 - source_spec: `_bmad-output/implementation-artifacts/spec-3-1-frontend-scaffold-with-generated-api-types-and-a-typed-clien.md`
   summary: Make `Program.cs` thinner at the quality pass (Story 4.2): move the service registrations and the Swagger setup into extension methods, for example `AddCubeServices`, `AddOpenApiDocument` and `UseDevelopmentTools`, in the Api project.
